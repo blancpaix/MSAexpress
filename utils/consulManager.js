@@ -16,7 +16,6 @@ export default class ConsulManger {
   }
 
   registerService() {
-    console.log('this??', this);
     consulClient.agent.service.register({
       id: this.id,
       name: this.name,
@@ -30,7 +29,7 @@ export default class ConsulManger {
   };
 
   unregisterService(err) {
-    err && console.error('unregisterService! Occured!', err, this);
+    err && console.error('Unregister service is occured!', err, this);
     consulClient.agent.service.deregister(this.id, () => {
       process.exit(err ? 1 : 0);
     });

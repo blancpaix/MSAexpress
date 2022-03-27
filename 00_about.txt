@@ -9,22 +9,29 @@ Single Endpoint (reverse proxyy)
   -Custom
     /auth
     /payment
+
     /api
     /chat
+
+Session
+  storing in in-memory DB (Redis)
     
     
 Server List
   proxyLoadBalancer,
-  api-server,
   auth-server,
-  payment-server
+  payment-server,
+  api-server,
   chat-server
+
+Mesh Service tools
+  Consul
 
 DB List
   RDB
     auth-DB
     payment-DB
     chat-DB
-  MEMCACHE
+  IN_MEMORY DB
     Redis for session
 
