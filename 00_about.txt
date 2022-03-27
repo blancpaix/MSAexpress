@@ -1,0 +1,30 @@
+MSA Project
+
+api 서비스 별 Micro service 실행
+
+Single Endpoint (reverse proxyy)
+  -NginX
+  -Custom(node.js base loadBalancer)
+
+  -Custom
+    /auth
+    /payment
+    /api
+    /chat
+    
+    
+Server List
+  proxyLoadBalancer,
+  api-server,
+  auth-server,
+  payment-server
+  chat-server
+
+DB List
+  RDB
+    auth-DB
+    payment-DB
+    chat-DB
+  MEMCACHE
+    Redis for session
+
