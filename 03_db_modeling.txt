@@ -1,0 +1,40 @@
+DB 테이블 설계 - 이거 툴 써서 기본 쿼리는 뽑아놔야 겠구먼....
+exERD 이것도 잇는데 그냥 워크벤치꺼 쓰자...
+
+auth-service : auth_msa
+USER {
+  userUID : int (pk)
+  email : char(12)
+  phoneNumber : char(11)
+  name : char(6),
+  displayName: char(24),
+  password : char(128),
+  point : int,
+}
+POINT {
+  idx : int,
+  timestamp : date,
+  path : string (16),
+  logs : string (32),
+  amount : int,
+  userUID : int (fk),
+}
+  
+Pay-serive : pay_msa
+  db2: pay-msa
+    ITEMS : {
+      itemUID, price, discount, count, discription, img, ...
+    },
+    BUYING : {
+      userUID, count, price, discount, ...
+    },
+
+  db3: etc-msa
+    BOARD : {
+      timestamp, userUID, displayName, password, title, content
+    },
+    COMMENT: {
+      timestamp, userUID, displayName, password, comment
+    }
+
+  

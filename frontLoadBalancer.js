@@ -8,18 +8,22 @@ const routing = [
     service: 'auth-service',
     index: 0,
   },
-  {
-    path: '/pay',
-    service: 'pay-service',
-    index: 0,
-  },
-  {
-    path: '/etc',
-    service: 'etc-service',
-    index: 0,
-  },
+  // {
+  //   path: '/pay',
+  //   service: 'pay-service',s
+  //   index: 0,
+  // },
+  // {
+  //   path: '/chat',
+  //   service: 'chat-service',
+  //   index: 0,
+  // },
+  // {
+  //   path: '/etc',
+  //   service: 'etc-service',
+  //   index: 0,
+  // },
 ];
-// routing path를 기능별로 분리를 할거임
 
 const cache = new Map();
 
@@ -27,14 +31,13 @@ const consulClient = consul();
 const proxy = httpProxy.createProxyServer();
 
 proxy.on('error', (err, req, res) => {
-  console.log('이거 왜이럼...');
   res.writeHead(500).end('Something was wrong...');
 });
 
+// 저장된 캐시 10초마다 제거
 async function removeCacheTimer(path) {
   setTimeout(() => {
     cache.delete(path);
-    console.log('캐시가 삭제됩니다만??');
   }, 10000);
 };
 
@@ -45,7 +48,7 @@ const fetchServices = async (route) => {
   } else {
     return await consulList(route);
   }
-}
+};
 
 const consulList = (route) => {
   return new Promise((resolve, reject) => {
@@ -58,7 +61,7 @@ const consulList = (route) => {
       resolve(servers);
     })
   })
-}
+};
 
 const server = createServer(async (req, res) => {
   if (req.url === "/favicon.ico") return;

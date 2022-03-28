@@ -3,18 +3,21 @@ import { redisBuilder } from '../utils/RedisConnector.js';
 
 const router = express.Router();
 const redis = redisBuilder();
+redis.on('connect', () => { console.log('[Redis] connect to local-server') });
 
 function logger(req, res, next) {
   console.log('Time : ', Date.now());
   next();
 };
 
+
 router.use(logger);
 
 
 // Sample test
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   redis.set("foo", "bar");
+  console.log('check dbPool', global.dbPool);
   res.end('you want to join us?');
 });
 

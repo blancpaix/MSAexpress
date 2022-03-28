@@ -1,4 +1,15 @@
-MSA Project
+[Initialize]
+in CMD:
+  consul agent -dev
+
+in project directory:
+  npm run pay
+  npm run auth
+
+run Redis-server.exe in local;
+
+
+[MSA Project]
 
 api 서비스 별 Micro service 실행
 
@@ -19,15 +30,15 @@ Session
     
 Server List
   proxyLoadBalancer,
-  auth-server,
-  payment-server,
-  api-server,
-  chat-server
+  auth-service server,
+  pay-service -server,
+  etc-service -server,
+  chat-service server
 
 Mesh Service tools
   Consul
 
-DB List
+DB
   RDB
     auth-DB
     payment-DB
