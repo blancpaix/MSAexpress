@@ -1,0 +1,5 @@
+/auth/signup
+req.body = { email, password, displayname, phonenum }
+
+/auth/signin
+req.body = { email, password }

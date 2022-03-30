@@ -1,21 +1,10 @@
 import Redis from 'ioredis';
+import { redisConfig } from './ConfigManager.js';
 
-const basicOpts = {
-  port: 6379,
-  host: '127.0.0.1',
-  db: 0,
+export const RedisConn = new Redis(redisConfig);
+RedisConn.on('connect', () => { console.log('[REDIS] connect to local-server') });
+RedisConn.on('error', (err) => { console.error('|REDIS| cannot connect to Redis Server', err) });
 
-  retryStrategy(times) {
-    const delay = Math.min(times * 50, 2000);
-    return delay;
-  },
-  maxRetriesPerRequest: 1,
-  // ttl 은 나중에 꼭 추가합시다
-};
-
-export function redisBuilder(opts) {
-  return new Redis({ ...basicOpts, ...opts });
-}
 
 
 /*
@@ -42,8 +31,6 @@ const cluster = new Redis.Cluster(nodes, {
     password: "your-cluster-password",
   },
 });
-
-
 
 
 == normal options

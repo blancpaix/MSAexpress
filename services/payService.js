@@ -3,7 +3,6 @@ import portFinder from 'portfinder';
 import { nanoid } from 'nanoid';
 import morgan from 'morgan';
 
-
 import ConsulManager from '../utils/consulManager.js';
 import payIndexRouter from '../routers/pay_indexRouter.js';
 
