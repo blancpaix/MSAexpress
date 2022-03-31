@@ -1,61 +1,31 @@
-DB 테이블 설계 - 이거 툴 써서 기본 쿼리는 뽑아놔야 겠구먼....
-exERD 이것도 잇는데 그냥 워크벤치꺼 쓰자
+DB 테이블 설계
 
-ORM 사용을 자제하고 raw query 를 직접 작성해보고 싶었는데 고안해야 할 제약사항이 많아서 ORM 써야겠다.
+ORM 사용을 자제하고 raw query 를 직접 작성해보고 싶었는데 Model 구현하기가 애매해서 ORM 써야겠다.
 씁쓸하구먼
 
-
+================================
 auth-service : auth_msa
 
-
-USER {
-  userUID : int (pk)
-  email : char(12)
-  phoneNumber : char(11)
-  name : char(6),
-  displayName: char(24),
-  password : char(128),
-  point : int,
-  state : int(2) { 0: 활성화, 1: 비활성화, 2: 탈퇴 }
-}
-POINT {
-  idx : int,
-  createdAt : date,
-  method : string (16),
-  note : string (32),
-  amount : int,
-  userUID : int (fk),
-}
-
+  USER {
+    userUID : int (pk)
+    email : char(12)
+    phoneNumber : char(11)
+    name : char(6),
+    displayName: char(24),
+    password : char(128),
+    point : int,
+    state : int(2) { 0: 활성화, 1: 비활성화, 2: 탈퇴 }
+  }
+  POINT {
+    idx : int,
+    createdAt : date,
+    method : string (16),
+    note : string (32),
+    amount : int,
+    userUID : int (fk),
+  }
 
 CREATE DATABASE IF NOT EXISTS aut_msa
-
-CREATE TABLE IF NOT EXISTS `users` (
-  `userUID` int NOT NULL AUTO_INCREMENT,
-  `email` varchar(45) NOT NULL,
-  `phoneNumber` varchar(45) DEFAULT NULL,
-  `displayname` varchar(45) NOT NULL,
-  `password` varchar(128) NOT NULL,
-  `point` int(10) unsigned zerofill NOT NULL,
-  `state` int(2) unsigned zerofill NOT NULL DEFAULT '00',
-  PRIMARY KEY (`userUID`),
-  UNIQUE KEY `email_UNIQUE` (`email`),
-  UNIQUE KEY `phoneNumber_UNIQUE` (`phoneNumber`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='User data'
-;
-
-CREATE TABLE IF NOT EXISTS `points` (
-  `idx` int NOT NULL,
-  `date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `method` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `note` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `amount` int NOT NULL,
-  `userUID` int NOT NULL,
-  PRIMARY KEY (`idx`),
-  KEY `FK_users_points_idx` (`userUID`),
-  CONSTRAINT `FK_users_points` FOREIGN KEY (`userUID`) REFERENCES `users` (`userUID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8
-
 
 CREATE TABLE IF NOT EXISTS `Users` (`userUID` CHAR(36) BINARY NOT NULL , `email` VARCHAR(255) NOT NULL UNIQUE, `phoneNumber` VARCHAR(255) NOT NULL UNIQUE, `name` VARCHAR(255) NOT NULL, `passwrod` VARCHAR(255) NOT NULL, `point` INTEGER NOT NULL DEFAULT 0, `state` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (`userUID`)) ENGINE=InnoDB;
 SHOW INDEX FROM `Users` FROM `auth_msa`
@@ -63,32 +33,27 @@ CREATE TABLE IF NOT EXISTS `Points` (`idx` INTEGER NOT NULL auto_increment , `me
 SHOW INDEX FROM `Points` FROM `auth_msa`
 
 
-CREATE TABLE `auth_msa`.`point` (
-  `idx` INT NOT NULL AUTO_INCREMENT,
-  `timestamp` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `path` VARCHAR(45) NOT NULL DEFAULT 'etc',
-  `comment` VARCHAR(60) NULL,
-  `amount` INT NOT NULL,
-  `userUID` VARCHAR(45) NULL,
-  INDEX `user.idx_idx` (`userUID` ASC) VISIBLE,
-  CONSTRAINT `user.idx`
-    FOREIGN KEY (`userUID`)
-    REFERENCES `auth_msa`.`user` (`email`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-COMMENT = 'User\'s point logs';
+================================
+pay-serive : pay_msa
 
-
-  
-Pay-serive : pay_msa
   db2: pay-msa
     ITEMS : {
-      itemUID, price, discount, count, discription, img, ...
+      itemUID, price, discount, count, discription, img, manager
     },
-    BUYING : {
-      userUID, count, price, discount, ...
+    Purchases : {
+      userUID, count, price, discount, timestamp, method, memo, itemUID(items)
     },
 
+CREATE DATABASE IF NOT EXISTS aut_msa
+
+CREATE TABLE IF NOT EXISTS `Items` (`itemUID` INTEGER NOT NULL auto_increment , `price` INTEGER NOT NULL, `discription` VARCHAR(255), `count` INTEGER NOT NULL DEFAULT 0, `img` VARCHAR(255), `manager` VARCHAR(255) NOT NULL, PRIMARY KEY (`itemUID`)) ENGINE=InnoDB;
+SHOW INDEX FROM `Items` FROM `pay_msa`
+CREATE TABLE IF NOT EXISTS `Purchases` (`idx` INTEGER NOT NULL , `count` INTEGER NOT NULL, `price` INTEGER NOT NULL, `discount` INTEGER, `method` VARCHAR(255) NOT NULL, `userUID` VARCHAR(255) NOT NULL, `memo` VARCHAR(255), `ItemItemUID` INTEGER, PRIMARY KEY (`idx`), FOREIGN KEY (`ItemItemUID`) REFERENCES `Items` (`itemUID`) ON DELETE SET NULL ON UPDATE CASCADE) ENGINE=InnoDB;
+SHOW INDEX FROM `Purchases` FROM `pay_msa`
+
+
+========================================
+etc-service : etc_msa
   db3: etc-msa
     BOARD : {
       timestamp, userUID, displayName, password, title, content
@@ -97,7 +62,6 @@ Pay-serive : pay_msa
       timestamp, userUID, displayName, password, comment
     }
 
-  
 
 
 sequelize
@@ -123,7 +87,7 @@ DataTypes.DATEONLY   // DATE without time
 const User = sequelize.define(modelName, attr, opts)
 ================
 const User extends {
-  id (idx 이거는 자동으로 삭제되는가보다...?) pk 라서? autoIncrement 라서??
+  id (idx 이거는 자동으로 삭제되는가보다?) pk 라서?
 };
 
 const userModel = User.init({
@@ -132,8 +96,8 @@ const userModel = User.init({
   // other model opts
   sequelize, // pass the connection instance
   modelName : 'Sample'
-})
+});
+이 방법으로는 한번에 통합하기 힘들듯
 
-userModel.id = sampleModel.belongsTo(User); 뭐 이따구로 쓴다는거니??
 
-sequelize.sync() 하면 만들어진다는거 같네?
+sequelize.sync() 하면 table 생성 됨

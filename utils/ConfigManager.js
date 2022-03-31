@@ -42,7 +42,7 @@ export const sessionConfig = {
   saveUninitialized: false,
   secret: process.env.SESSION_SECRET,
   cookie: {
-    maxAge: 1000 * 10,
+    maxAge: 1000 * 120,
     httpOnly: true,
     secure: false,     // ssl 적용 후  true 전환
   },

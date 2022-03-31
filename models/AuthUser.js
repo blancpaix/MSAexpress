@@ -33,7 +33,7 @@ export default function (sequelize, DataTypes) {
       type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 0,
-      // 0 : Active, 1: Deactive, 3: deleted
+      // 0 : Active, 1: Deactive, 3: deleted, 4: manager
     },
   }, {
     // Other model options go here

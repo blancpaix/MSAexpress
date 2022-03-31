@@ -1,7 +1,6 @@
 import Strategy from 'passport-local'
 import bcrypt from 'bcrypt';
-import { db } from '../models/authIndex.js'
-
+import { db } from '../models/AuthIndex.js'
 
 export default function (passport) {
   passport.use(new Strategy.Strategy({

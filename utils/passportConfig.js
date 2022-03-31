@@ -2,6 +2,7 @@ import local from './passportLoacalStrategy.js';
 import { RedisConn } from './RedisConnector.js';
 
 // 들어온 req값을 추가적으로 사용하도록 값들 지정
+// req.session 은 외부에서 들어오기때문에 사용하지 마시고 req.user 사용하세요
 
 // Redis Sesson Store 저장, 간략할수록 좋음
 // 세션은 SessionID 로 확인

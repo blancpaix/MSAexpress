@@ -2,26 +2,41 @@ import express from 'express';
 import bcrypt from 'bcrypt';
 import passport from 'passport';
 import { isActivate, notActivate } from './middlewares/sessionChecker.js'
-import { db } from '../models/authIndex.js';
+import { db } from '../models/AuthIndex.js';
+
+// 계층 분리할겨
 
 const router = express.Router();
 
-function logger(req, res, next) {
-  console.log('Time : ', Date.now());
-  next();
-};
+router.post('/signin', notActivate, (req, res, next) => {
+  passport.authenticate('local', (authErr, user, msg) => {
+    if (authErr) {
+      console.error('Error /auth/signin ', authErr);
+      return next(authErr);
+    }
+    if (!user) res.status(401).send(msg);
 
-router.use(logger);
+    return req.login(user, signinErr => {
+      if (signinErr) {
+        console.error('Error /auth/signin', signinErr.alert);
+        return next(signinErr);
+      };
 
-// Sample test
-router.get('/', async (req, res) => {
-  console.log(req.session, req.sessionID);
-  res.end('you want to join us?');
+      res.status(200).send(true);
+    })
+
+  })(req, res, next)
 });
 
+router.post('/signout', isActivate, (req, res) => {
+  req.logout();
+  req.session.destroy(() => {
+    console.log('session destroy!');
+    res.redirect('/auth');
+  });
+});
 
 router.post('/signup', notActivate, async (req, res, next) => {
-  console.log(req.body);
   const { email, password, displayname, phonenum } = req.body;
   try {
     const user = await db.User.findOne({ where: { email } });
@@ -41,52 +56,24 @@ router.post('/signup', notActivate, async (req, res, next) => {
   }
 });
 
-router.get('/active', isActivate, (req, res, next) => {
-  console.log(req.user);
-  res.send('thisthisthis');
-});
+router.post('/findid', notActivate, async (req, res, next) => {
+  const { phonenum } = req.body;
+  try {
 
-router.get('/deactive', notActivate, (req, res, next) => {
-  console.log(req.user);
-  res.send('deactive');
+  } catch (err) {
+    console.error(err);
+    return next(err);
+  }
 })
-
-router.post('/signin', notActivate, (req, res, next) => {
-  passport.authenticate('local', (authErr, user, msg) => {
-    if (authErr) {
-      console.error('Error /auth/signin ', authErr);
-      return next(authErr);
-    }
-    if (!user) res.status(401).send(msg);
-
-    return req.login(user, signinErr => {
-      if (signinErr) {
-        console.error('Error /auth/signin', signinErr.alert);
-        return next(signinErr);
-      };
-
-
-      res.status(200).send(true);
-    })
-
-  })(req, res, next)
-});
-
-
-
-
-
-
-router.route('/better/better/:id')
-  .get((req, res) => {
-    console.log('much better GET!');
-    res.end('much better GET!');
-  })
-  .post((req, res) => {
-    console.log('PUT!', req.params);
-    res.send(req.params);
-  });
 
 
 export default router;
 
+
+
+
+function logger(req, res, next) {
+  console.log('Time : ', Date.now());
+  next();
+};
+router.use(logger);

@@ -7,7 +7,7 @@ import session from 'express-session';
 import passport from 'passport';
 
 import ConsulManager from '../utils/ConsulManager.js';
-import { db } from '../models/authIndex.js';
+import { db } from '../models/AuthIndex.js';
 import { RedisConn } from '../utils/RedisConnector.js';
 import { sessionConfig } from '../utils/ConfigManager.js'
 
@@ -20,9 +20,9 @@ async function main() {
   const PORT = await portFinder.getPortPromise();
   const serviceId = nanoid();
   const ADDRESS = process.env.ADDRESS || 'localhost';
-  const app = express();
   const authConsul = new ConsulManager(serviceType, serviceId, ADDRESS, PORT);
   const RedisStore = connRedis(session);
+  const app = express();
 
   process.on('exit', data => authConsul.unregisterService(data));
   process.on('SIGINT', data => authConsul.unregisterService(data));
@@ -32,8 +32,6 @@ async function main() {
   app.use(express.urlencoded({ extended: true }));
 
   db.sequelize.sync();
-
-
   passportConfig(passport);
 
   app.use(morgan('dev'));

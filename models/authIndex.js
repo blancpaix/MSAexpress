@@ -1,7 +1,7 @@
 import Sequelize, { DataTypes } from 'sequelize';
 
-import User from './User.js';
-import Point from './Point.js';
+import User from './AuthUser.js';
+import Point from './AuthPoint.js';
 import { dbConfig } from '../utils/ConfigManager.js'
 
 export const db = {};
