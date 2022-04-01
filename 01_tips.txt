@@ -1,3 +1,19 @@
 promise 로 함수 시작했으면
   .then() 에서 값이 도출되지 않는경우
   .catch(next) 로 next를 명시적으로 호출하고 프라미스를 종료시켜야 함
+
+JSON string => JSON.parse
+JSON JSON => JSONObj.stringify
+
+req.
+  param : url 주소에 변수 포함 (pagenation 구현)
+  query : path 이후의 변수를 담음 (/api? a=b&c=d )
+  body : XML, JSON 등의 form 형식을 통해 전달되는 값 (주소 확인 x)
+
+RESTful api 
+  patch : 부분 update
+  set : 일괄 update, 대상의 props 누락시 제거됨
+
+res.send() : 전송 args 에 따라 content-type 자동 변경
+res.json() : json 형식으로 변환후 전송, content-type : application/JSON 고정
+res.end() : 전송할거는 없고, response 는 끝내고 싶고

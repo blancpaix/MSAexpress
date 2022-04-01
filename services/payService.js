@@ -43,9 +43,8 @@ async function main() {
   app.use(passport.session());      // req.session 객체에 passport info 설정    // 여기 오지도 않ㅇ므 se, de seraizliae 인데
 
   app.use('/pay', payRouter);
-  app.use((req, res, next) => {
-    const err = new Error('404, NOT FOUND');
-    err.status = 404;
+  app.use((err, req, res, next) => {
+    console.log('err last handler', err);
     next(err);
   });
 

@@ -14,7 +14,7 @@ router.post('/signin', notActivate, (req, res, next) => {
       console.error('Error /auth/signin ', authErr);
       return next(authErr);
     }
-    if (!user) res.status(401).send(msg);
+    if (!user) return res.status(401).send(msg);
 
     return req.login(user, signinErr => {
       if (signinErr) {
@@ -36,6 +36,25 @@ router.post('/signout', isActivate, (req, res) => {
   });
 });
 
+router.post('/dropout', isActivate, (req, res) => {
+  try {
+    const { phonenum } = req.body;
+    const userData = JSON.parse(req.user);
+    if (userData.passport.user.phonenum === phonenum) {
+      const result = await db.User.destroy({ where: { userUID: userData.passport.user.userUID } });
+      if (result) {
+        res.send(result.toString());
+      } else {
+        res.send(false);
+      }
+    };
+    res.send(false);
+  } catch (err) {
+    console.error('Error!, POST /auth/dropout', err);
+    next(err);
+  }
+});
+
 router.post('/signup', notActivate, async (req, res, next) => {
   const { email, password, displayname, phonenum } = req.body;
   try {
@@ -52,19 +71,34 @@ router.post('/signup', notActivate, async (req, res, next) => {
     res.send(true);
   } catch (err) {
     console.error(err);
-    return next(err);
+    next(err);
   }
 });
 
 router.post('/findid', notActivate, async (req, res, next) => {
   const { phonenum } = req.body;
   try {
-
+    const result = await db.User.findOne({ where: { phonenum } });
+    if (result) {
+      res.send(result.email);
+    } else {
+      res.send('Your account does not exist.')
+    }
   } catch (err) {
     console.error(err);
-    return next(err);
+    next(err);
   }
-})
+});
+
+// router.post('/findpw', notActivate, async (req, res, next) => {
+//   const { email } = req.body;
+//   try {
+//     const result = await db.User.findOne({ where })
+//   } catch (err) {
+//     console.error('Error! POST /auth/findpw', err);
+//     next();
+//   }
+// });
 
 
 export default router;

@@ -29,7 +29,7 @@ export default function (sequelize, DataTypes) {
       allowNull: false,
       defaultValue: 0,
     },
-    state: {
+    role: {
       type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 0,
@@ -37,7 +37,9 @@ export default function (sequelize, DataTypes) {
     },
   }, {
     // Other model options go here
-    timestamps: false,
+    paranoid: true,
+    timestamps: true,
+    updatedAt: false,
     createdAt: false,
   })
 }

@@ -1,6 +1,7 @@
 import Strategy from 'passport-local'
 import bcrypt from 'bcrypt';
 import { db } from '../models/AuthIndex.js'
+import { Op } from 'sequelize';
 
 export default function (passport) {
   passport.use(new Strategy.Strategy({
@@ -8,7 +9,14 @@ export default function (passport) {
     passwordField: 'password',
   }, async (email, password, done) => {
     try {
-      const result = await db.User.findOne({ where: { email } });
+      const result = await db.User.findOne({
+        where: {
+          email,
+          deletedAt: {
+            [Op.is]: null
+          },
+        }
+      });
       if (!result) return done(null, false, { alert: '일치하는 아이디가 존재하지 않습니다.' });
 
       const hashResult = await bcrypt.compare(password, result.password);

@@ -84,6 +84,7 @@ DataTypes.DATEONLY   // DATE without time
 {  type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4 // Or DataTypes.UUIDV1 }
 
 
+paranoid : 삭제시 deletedAt 값 설ㅈ어, destroy ({where}, {force : true})로 완전 삭제
 const User = sequelize.define(modelName, attr, opts)
 ================
 const User extends {

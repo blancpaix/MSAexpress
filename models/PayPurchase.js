@@ -32,8 +32,7 @@ export default function (sequelize, DataTypes) {
       allowNull: true,
     }
   }, {
-    timestamps: false,
+    timestamps: true,
     updatedAt: false,
-    createdAt: true,
   });
 }

@@ -27,13 +27,15 @@ export default function (sequelize, DataTypes) {
       type: DataTypes.STRING,
       allowNull: true,
     },
-    manager: {
+    manager: {    // user email
       type: DataTypes.STRING,
       allowNull: false,
-    }
+    },
   }, {
-    timestamps: false,
-    updatedAt: false,
+    paranoid: true,
+    timestamps: true,
+    createdAt: false,
+    updatedAt: true,
   })
 }
 

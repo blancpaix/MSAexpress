@@ -2,12 +2,12 @@
   "name": "nullproject",
   "version": "1.0.0",
   "description": "",
-  "main": "app.js",
+  "main": "frontLoadBalancer.js",
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "loadbalancer": "nodemon frontLoadBalancer.js",
-    "pay": "nodemon --signal SIGINT payService.js pay-service",
+    "pay": "nodemon --signal SIGINT ./services/payService.js pay-service",
     "auth": "nodemon --signal SIGINT authService.js auth-service",
     "etc": "nodemon --signal SIGINT etcService.js etc-service"
   },
@@ -25,6 +25,7 @@
     "morgan": "^1.10.0",
     "mysql2": "^2.3.3",
     "nanoid": "^3.3.1",
+    "nodemailer": "^6.7.3",
     "passport": "^0.5.2",
     "passport-local": "^1.0.0",
     "portfinder": "^1.0.28",
