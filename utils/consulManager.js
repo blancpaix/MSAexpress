@@ -24,12 +24,12 @@ export default class ConsulManger {
       tags: this.tags,
       check: this.check,
     }, () => {
-      console.log(`${this.name} registered successfully!`);
+      console.log(`[Consul] ${this.name} registered successfully!`);
     })
   };
 
   unregisterService(err) {
-    err && console.error('Unregister service is occured!', err, this);
+    err && console.error('|Consul| Unregister service!', err, this.tags);
     consulClient.agent.service.deregister(this.id, () => {
       process.exit(err ? 1 : 0);
     });

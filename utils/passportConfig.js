@@ -23,7 +23,7 @@ export default function (passport) {
   passport.deserializeUser((req, x, done) => {
     RedisConn.get("sess:" + req.sessionID, (err, result) => {
       if (err) {
-        console.error('|REDIS| get session data Error', err);
+        console.error('|REDIS| Error! caanot get a session', err);
         done(err);
       };
       done(null, result);

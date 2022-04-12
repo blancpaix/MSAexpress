@@ -14,23 +14,20 @@ auth-service : auth_msa
     displayName: char(24),
     password : char(128),
     point : int,
-    state : int(2) { 0: 활성화, 1: 비활성화, 2: 탈퇴 }
+    state : int(2) { 0: 활성화, 1: 비활성화, 2: 탈퇴, 3: 매니저 }
   }
+
   POINT {
     idx : int,
-    createdAt : date,
-    method : string (16),
-    note : string (32),
-    amount : int,
+    type : string,    
+    pay : int,
+    load : int,
+    itemUID : int (remote server fk),
+    note : string,
     userUID : int (fk),
+    createdAt : date,
   }
 
-CREATE DATABASE IF NOT EXISTS aut_msa
-
-CREATE TABLE IF NOT EXISTS `Users` (`userUID` CHAR(36) BINARY NOT NULL , `email` VARCHAR(255) NOT NULL UNIQUE, `phoneNumber` VARCHAR(255) NOT NULL UNIQUE, `name` VARCHAR(255) NOT NULL, `passwrod` VARCHAR(255) NOT NULL, `point` INTEGER NOT NULL DEFAULT 0, `state` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (`userUID`)) ENGINE=InnoDB;
-SHOW INDEX FROM `Users` FROM `auth_msa`
-CREATE TABLE IF NOT EXISTS `Points` (`idx` INTEGER NOT NULL auto_increment , `method` VARCHAR(255) NOT NULL DEFAULT 'etc', `note` VARCHAR(255), `amount` INTEGER NOT NULL, `UserUserUID` CHAR(36) BINARY, PRIMARY KEY (`idx`), FOREIGN KEY (`UserUserUID`) REFERENCES `Users` (`userUID`) ON DELETE SET NULL ON UPDATE CASCADE) ENGINE=InnoDB;
-SHOW INDEX FROM `Points` FROM `auth_msa`
 
 
 ================================
@@ -41,15 +38,16 @@ pay-serive : pay_msa
       itemUID, price, discount, count, discription, img, manager
     },
     Purchases : {
-      userUID, count, price, discount, timestamp, method, memo, itemUID(items)
+      userUID, 
+      count, 
+      price, 
+      discount, 
+      timestamp,
+      type,   // card, point, cash, phone, etc
+      remark, 
+      itemUID(items)
     },
 
-CREATE DATABASE IF NOT EXISTS aut_msa
-
-CREATE TABLE IF NOT EXISTS `Items` (`itemUID` INTEGER NOT NULL auto_increment , `price` INTEGER NOT NULL, `discription` VARCHAR(255), `count` INTEGER NOT NULL DEFAULT 0, `img` VARCHAR(255), `manager` VARCHAR(255) NOT NULL, PRIMARY KEY (`itemUID`)) ENGINE=InnoDB;
-SHOW INDEX FROM `Items` FROM `pay_msa`
-CREATE TABLE IF NOT EXISTS `Purchases` (`idx` INTEGER NOT NULL , `count` INTEGER NOT NULL, `price` INTEGER NOT NULL, `discount` INTEGER, `method` VARCHAR(255) NOT NULL, `userUID` VARCHAR(255) NOT NULL, `memo` VARCHAR(255), `ItemItemUID` INTEGER, PRIMARY KEY (`idx`), FOREIGN KEY (`ItemItemUID`) REFERENCES `Items` (`itemUID`) ON DELETE SET NULL ON UPDATE CASCADE) ENGINE=InnoDB;
-SHOW INDEX FROM `Purchases` FROM `pay_msa`
 
 
 ========================================
@@ -101,4 +99,4 @@ const userModel = User.init({
 이 방법으로는 한번에 통합하기 힘들듯
 
 
-sequelize.sync() 하면 table 생성 됨
+sequelize.sync() 하면 table 생성

@@ -1,132 +1,119 @@
 import express from 'express';
+import asyncHandler from 'express-async-handler';
 import { isActivate, notActivate, isOwn } from './middlewares/sessionChecker.js'
 
-import { db } from '../models/PayIndex.js';
-import { Op } from 'sequelize';
+import { PayLogics } from '../logics/payLogic.js';
+import { amqpRequest } from '../utils/mq/RequestFactory.js';
 
 const router = express.Router();
 
-router.get('/items', async (req, res, next) => {
-  try {
-    const itemList = await db.Item.findAll({
-      attributes: [
-        'itemUID',
-        'title',
-        'price',
-        'discription',
-        'img',
-        'manager',
-        'updatedAt'
-      ],
-      limit: 8,
-      where: {
-        deletedAt: {
-          [Op.is]: null
-        }
-      }
-    });
-    if (itemList && itemList.length) {
-      res.status(200).send(itemList);
-    } else {
-      res.send('empty');
-    }
-  } catch (err) {
-    console.error('Error! /pay/item ', err);
-    next(err);
-  }
+router.get('/items', async (req, res) => {
+  const itemList = PayLogics.getItems();
+  res.send(itemList);
 });
 
-router.post('/item', isActivate, async (req, res, next) => {
+router.post('/item', isActivate, asyncHandler(async (req, res) => {
   const { title, price, discription, count, img } = req.body;
-  const manager = req.session.passport.user.email;
-  try {
-    if (title && price && count && manager) {
-      const item = {
-        title,
-        price,
-        count,
-        img,
-        discription,
-        manager,
-      };
+  if (typeof title !== "string" || typeof price !== "number" || typeof count !== "number")
+    return res.status(412).json({ Error: '제품명, 가격, 수량 값을 다시 확인해주세요.' });
 
-      const result = await db.Item.create(item, { field: ['title'] });
-      if (result) {
-        res.status(200).send(result.itemUID.toString());
-      } else {
-        res.send(false);
-      }
-    } else {
-      res.status(403).send('Bad request.')
-    }
-  } catch (err) {
-    console.error('Error! /pay/item', err);
-  }
-});
+  const manager = req.session.passport.user.email;
+  const result = await PayLogics.registerItem(title, price, count, img, discription, manager);
+  res.status(200).send(result.itemUID.toString());
+}));
+
 
 // router.route()로 Post를 정상적으로 사용하기 어려움
 router.route('/item/:itemId')
-  .get(isActivate, async (req, res, next) => {
-    try {
-      const item = await db.Item.findOne({
-        where: { itemUID: req.params.itemId }
-      });
-
-      res.send(item);
-    } catch (err) {
-      console.error('Error! /pay/item/:id', err);
-      next(err);
+  .get(isActivate, asyncHandler(async (req, res) => {
+    const item = await PayLogics.findItemById(req.params.itemId);
+    res.send(item);
+  }))
+  .patch(isOwn, asyncHandler(async (req, res) => {
+    const { title, price, discription, img } = req.body;
+    const patchObj = {};
+    if (title && title.length > 0) {
+      if (typeof title !== "string") return res.status(412).json({ Error: '제품명이 잘못입력되었습니다.' })
+      patchObj.title = title;
     }
-  })
-  .post(isOwn, async (req, res, next) => {
+    if (price && price > 0) {
+      if (typeof price !== "number") return res.status(412).json({ Error: '가격이 잘못입력되었습니다.' })
+      patchObj.price = price;
+    }
+    if (discription && discription.length > 0) {
+      if (typeof discription !== "string") return res.status(412).json({ Error: '잘못된 설명이 입력되었습니다.' })
+      patchObj.discription = discription;
+    }
+    if (img && img.length > 0) {
+      if (typeof img !== "string") return res.status(412).json({ Error: '이미지 경로를 다시 확인해주세요.' })
+      patchObj.img = img;
+    }
+
+    const result = await PayLogics.patchItem({ itemUID: req.params.itemId, value: patchObj });
+    res.status(200).send(result);
+  }))
+  .delete(isOwn, asyncHandler(async (req, res) => {
+    await PayLogics.deleteItem(req.params.itemId);
+    res.send(true);
+  }));
+
+router.route('/checkout/:itemUID')
+  .post(isActivate, async (req, res, next) => {
+    let purchaseUID = null;
     try {
-      const result = await db.Item.update({ state: 0 }, {
-        where: {
-          itemUID: req.params.itemId
+      const itemUID = req.params.itemUID;
+      if (!itemUID) return res.status(412).json({ Error: '상품 번호가 잘못되었습니다.' });
+      const userUID = req.session.passport.user.userUID;
+      const { count, price, discount, type, remark } = req.body;
+      if (typeof count !== "number" || typeof price !== "number" || typeof type !== "string")
+        return res.status(412).json({ Error: '결제 수단, 가격, 수량을 다시 확인해주세요.' });
+
+      const selectedItem = await PayLogics.findItemById(itemUID);
+      if (!selectedItem)
+        return res.status(412).json({ Error: '해당 상품을 찾을 수 없습니다.' });
+      if (selectedItem.price !== price)
+        return res.status(412).json({ Error: '상품 가격이 일치하지 않습니다.' });
+      if (selectedItem.count - count < 0)
+        return res.status(412).json({ Error: '재고가 부족합니다.' });
+
+      const result = await PayLogics.recordPurchase(count, price, discount, type, userUID, remark, itemUID);
+      purchaseUID = result.idx;
+
+      const reply = await amqpRequest.send('auth_queue', {
+        event: 'purchase',
+        value: {
+          type,
+          remark,
+          pay: (price * count) - discount,
+          purchaseUID,
+          userUID,
         }
       });
-      if (result) {
-        res.send(true);
-      } else {
-        res.send(false);
-      }
-    } catch (err) {
-      console.error('Error! POST /pay/item/:itemId', err);
-      next(err);
-    }
-  })
-  .patch(isOwn, async (req, res, next) => {
-    try {
-      const updateSet = req.body;
-      const result = await db.Item.update(updateSet, {
-        where: { itemUID: req.params.itemId }
-      });
-      if (result) {
-        res.send(true);
-      } else {
-        res.send(false);
-      };
-    } catch (err) {
-      console.error('Error! PATCH /pay/item/:itemId', err);
-      next(err);
-    }
-  })
-  .delete(isOwn, async (req, res, next) => {
-    try {
-      const result = await db.Item.destroy({
-        where: { itemUID: req.params.itemId }
-      });
-      console.log('delete result', result);
 
-      if (result) {
-        res.send(true);
-      } else {
-        res.send(false);
-      }
+      if (reply.Error) throw Error(reply.Error);
+      res.status(200).json(reply);
     } catch (err) {
-      console.error('Error! DELETE /pay/item/itemId')
+      if (purchaseUID) await PayLogics.deletePurchase(purchaseUID);
+      console.error('Error! POST /pay/checkout/:itemId]', err);
+      next({ code: 412, message: err.message });
     }
   });
+
+
+router.get('/purchases', isActivate, asyncHandler(async (req, res) => {
+  const userUID = req.session.passport.user.userUID;
+  const result = await PayLogics.getPurchases(userUID);
+  res.json(result);
+}));
+
+router.get('/purchase/:purchaseUID', isActivate, asyncHandler(async (req, res) => {
+  const userUID = req.session.passport.user.userUID;
+  const result = await PayLogics.getPurchase(req.params.purchaseUID, userUID);
+  res.json(result);
+}))
+
+
+
 
 
 export default router;

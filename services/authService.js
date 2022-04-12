@@ -13,6 +13,10 @@ import { sessionConfig } from '../utils/ConfigManager.js'
 
 import authRouter from '../routers/authRouter.js';
 import passportConfig from '../utils/passportConfig.js';
+import '../amqp/authHandler.js';
+
+const node_env = process.env.NODE_ENV === "production" ? "production" : "dev";
+console.log('[CHECK ENV] : ', node_env);
 
 async function main() {
   const serviceType = process.argv[2];
@@ -39,16 +43,23 @@ async function main() {
     ...sessionConfig,
     store: new RedisStore({ client: RedisConn }),
   }));
-  app.use(passport.initialize());   // req 객체에 passport 설정
-  app.use(passport.session());      // req.session 객체에 passport info 설정    // 여기 오지도 않ㅇ므 se, de seraizliae 인데
+  app.use(passport.initialize());   // req에 passport 적용
+  app.use(passport.session());      // req.session에 passport info 설정
 
   app.use('/auth', authRouter);
-  app.use((req, res, next) => {
-    const err = new Error('404, NOT FOUND');
-    err.status = 404;
-    next(err);
+
+  app.use((err, req, res, next) => {
+    console.log('Error Occured! checked in error middleware', err);
+    res.status(500).send({
+      message: 'Error Occured!',
+      err
+    });
   });
 
+  // Error 도 없고, 페이지도 없고,
+  app.use((req, res, next) => {
+    res.sendStatus(404);
+  });
 
   app.listen(PORT, () => {
     authConsul.registerService();

@@ -8,11 +8,11 @@ const routing = [
     service: 'auth-service',
     index: 0,
   },
-  // {
-  //   path: '/pay',
-  //   service: 'pay-service',s
-  //   index: 0,
-  // },
+  {
+    path: '/pay',
+    service: 'pay-service',
+    index: 0,
+  },
   // {
   //   path: '/chat',
   //   service: 'chat-service',

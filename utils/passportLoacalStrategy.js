@@ -17,10 +17,10 @@ export default function (passport) {
           },
         }
       });
-      if (!result) return done(null, false, { alert: '일치하는 아이디가 존재하지 않습니다.' });
+      if (!result) return done(null, false, '일치하는 아이디가 존재하지 않습니다.');
 
       const hashResult = await bcrypt.compare(password, result.password);
-      if (!hashResult) return done(null, false, { alert: '비밀번호가 일치하지 않습니다.' })
+      if (!hashResult) return done(null, false, '비밀번호가 일치하지 않습니다.')
       delete result.password;
       return done(null, result);
     } catch (err) {

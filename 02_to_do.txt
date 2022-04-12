@@ -1,0 +1,19 @@
+
+3layer 분리
+controller => router
+  요청 받고 처리 로직 호출, 전달
+services => logics
+  db 작용들 설정, return 값 설정
+  req, res 활용을 하지 않음
+dataAccess Layer => models
+  DB model
+
+
+
+============
+
+
+get purchases
+  specific one / 
+
+cors 설정

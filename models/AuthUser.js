@@ -10,15 +10,33 @@ export default function (sequelize, DataTypes) {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
+      validate: {
+        isEmail: {
+          msg: '이메일 주소를 다시 입력해주세요.'
+        }
+      }
     },
     phonenum: {
       type: DataTypes.STRING,
       allowNull: true,
       unique: true,
+      validate: {
+        is: {
+          args: /(0+[0-9]{8,9})\d$/g,
+          msg: "휴대전화 번호를 다시 입력해주세요."
+        }
+      }
     },
     displayname: {
       type: DataTypes.STRING,
       allowNull: false,
+      validate: {
+        len: {
+          args: [2, 12],
+          msg: "2자 부터 12자까지 설정 할 수 있습니다."
+        },
+
+      }
     },
     password: {
       type: DataTypes.STRING,
@@ -28,15 +46,26 @@ export default function (sequelize, DataTypes) {
       type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 0,
+      validate: {
+        min: {
+          args: [0],
+          msg: "포인트가 부족합니다."
+        }
+      }
     },
     role: {
       type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 0,
-      // 0 : Active, 1: Deactive, 3: deleted, 4: manager
+      // 0 : Active, 1: Deactive, 2: deleted, 3: manager,
+      validate: {
+        len: {
+          args: [0, 3],
+          msg: "잘못된 값이 지정되었습니다.",
+        }
+      }
     },
   }, {
-    // Other model options go here
     paranoid: true,
     timestamps: true,
     updatedAt: false,

@@ -10,18 +10,14 @@ run Redis-server.exe in local;
 
 
 [MSA Project]
-
 api 서비스 별 Micro service 실행
 
 Single Endpoint (reverse proxyy)
-  -NginX
-  -Custom(node.js base loadBalancer)
+  -Custom Loadbalancer (node.js base loadBalancer)
 
   -Custom
     /auth
     /payment
-
-    /api
     /chat
 
 Session
@@ -32,17 +28,16 @@ Server List
   proxyLoadBalancer,
   auth-service server,
   pay-service -server,
-  etc-service -server,
-  chat-service server
+  chat-service -server,
 
 Mesh Service tools
   Consul
 
 DB
   RDB
-    auth-DB
-    payment-DB
-    chat-DB
+    auth-msa
+    pay-msa
+    chat-msa
   IN_MEMORY DB
     Redis for session
 

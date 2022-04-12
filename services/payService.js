@@ -14,6 +14,8 @@ import payRouter from '../routers/payRouter.js';
 import passportConfig from '../utils/passportConfig.js';
 import { RedisConn } from '../utils/RedisConnector.js';
 
+import { amqpRequest } from '../utils/mq/RequestFactory.js';
+
 async function main() {
   const serviceType = process.argv[2];
   const { pid } = process;
@@ -23,6 +25,7 @@ async function main() {
   const payConsul = new ConsulManager(serviceType, serviceId, ADDRESS, PORT);
   const RedisStore = connRedis(session);
   const app = express();
+  await amqpRequest.initialize();
 
   process.on('exit', data => payConsul.unregisterService(data));
   process.on('SIGINT', data => payConsul.unregisterService(data));
@@ -43,9 +46,15 @@ async function main() {
   app.use(passport.session());      // req.session 객체에 passport info 설정    // 여기 오지도 않ㅇ므 se, de seraizliae 인데
 
   app.use('/pay', payRouter);
+
+
   app.use((err, req, res, next) => {
     console.log('err last handler', err);
-    next(err);
+    res.status(err.code || 500).json({ Error: err.message });
+  });
+
+  app.use((req, res, next) => {
+    res.status(404).json({ Error: 'Not Found' });
   });
 
 

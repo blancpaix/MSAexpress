@@ -2,9 +2,6 @@ promise 로 함수 시작했으면
   .then() 에서 값이 도출되지 않는경우
   .catch(next) 로 next를 명시적으로 호출하고 프라미스를 종료시켜야 함
 
-JSON string => JSON.parse
-JSON JSON => JSONObj.stringify
-
 req.
   param : url 주소에 변수 포함 (pagenation 구현)
   query : path 이후의 변수를 담음 (/api? a=b&c=d )
@@ -12,8 +9,33 @@ req.
 
 RESTful api 
   patch : 부분 update
-  set : 일괄 update, 대상의 props 누락시 제거됨
+  set : 일괄 덮어쓰기, 누락된 column은 null 처리
 
 res.send() : 전송 args 에 따라 content-type 자동 변경
 res.json() : json 형식으로 변환후 전송, content-type : application/JSON 고정
 res.end() : 전송할거는 없고, response 는 끝내고 싶고
+
+
+HTTP state code
+400 : 요청 구문 인식 불가
+401 : 권한 없음 (인증 실패)
+402 : 결제 필요??..
+403 : 서버 요청 거부 (인가 실패)
+404 : 요청 페이지 찾을 수 없음
+405 : 비허용 메소드
+406 : 허용되지 않음 -요청한 페이지가 요청한 콘텐츠 특성으로 응답 불가
+408 : 요청 시간 초과
+412 : 사전 조건 실패
+error.status = ERROR_CODE;
+
+res.sendStatus(statusCode)
+res.sendStatus(200); // equivalent to res.status(200).send('OK')
+res.sendStatus(403); // equivalent to res.status(403).send('Forbidden')
+res.sendStatus(404); // equivalent to res.status(404).send('Not Found')
+res.sendStatus(500); // equivalent to res.status(500).send('Internal Server Error')
+res.sendStatus(2000); // equivalent to res.status(2000).send('2000')
+res.status(STATE_CODE).send('alhpa');
+
+
+process.env.NODE_ENV = "production" 이면 error.stack 이게 안뜬다는건가??
+
