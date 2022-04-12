@@ -7,10 +7,10 @@ import { amqpRequest } from '../utils/mq/RequestFactory.js';
 
 const router = express.Router();
 
-router.get('/items', async (req, res) => {
-  const itemList = PayLogics.getItems();
-  res.send(itemList);
-});
+router.get('/items', asyncHandler(async (req, res) => {
+  const itemList = await PayLogics.getItems();
+  res.status(200).json(itemList);
+}));
 
 router.post('/item', isActivate, asyncHandler(async (req, res) => {
   const { title, price, discription, count, img } = req.body;
@@ -27,7 +27,7 @@ router.post('/item', isActivate, asyncHandler(async (req, res) => {
 router.route('/item/:itemId')
   .get(isActivate, asyncHandler(async (req, res) => {
     const item = await PayLogics.findItemById(req.params.itemId);
-    res.send(item);
+    res.status(200).json(item);
   }))
   .patch(isOwn, asyncHandler(async (req, res) => {
     const { title, price, discription, img } = req.body;
@@ -50,7 +50,7 @@ router.route('/item/:itemId')
     }
 
     const result = await PayLogics.patchItem({ itemUID: req.params.itemId, value: patchObj });
-    res.status(200).send(result);
+    res.status(200).json(result);
   }))
   .delete(isOwn, asyncHandler(async (req, res) => {
     await PayLogics.deleteItem(req.params.itemId);

@@ -48,3 +48,13 @@ export const sessionConfig = {
   },
 };
 
+export const mailerConfig = {
+  service: 'gmail',
+  host: 'smtp.gmail.com',
+  port: 587,
+  auth: {
+    user: process.env.MAILER_ADDRESS,
+    pass: process.env.MAILER_PASSWORD,
+  }
+};
+

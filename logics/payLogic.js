@@ -75,12 +75,32 @@ class PayLogic {
 
   async getPurchase(idx, userUID) {
     return await db.Purchase.findOne({
+      attributes: [
+        'idx',
+        'count',
+        'price',
+        'discount',
+        'type',
+        'remark',
+        'createdAt',
+        'ItemItemUID',
+      ],
       where: { idx, userUID }
     })
   };
 
   async getPurchases(userUID) {
     return await db.Purchase.findAll({
+      attributes: [
+        'idx',
+        'count',
+        'price',
+        'discount',
+        'type',
+        'remark',
+        'createdAt',
+        'ItemItemUID',
+      ],
       where: { userUID }
     })
   };

@@ -1,19 +1,56 @@
+import nodemailer from 'nodemailer';
+import { Op } from 'sequelize';
+
 import { db } from '../models/AuthIndex.js';
+import { mailerConfig } from '../utils/ConfigManager.js';
 
 class AuthLogic {
 
   // User data / null
   async findUserByEmail(email) {
-    return await db.User.findOne({ where: { email } });
+    return await db.User.findOne({
+      attributes: [
+        'email',
+        'phonenum',
+      ],
+      where: {
+        email,
+        deletedAt: {
+          [Op.is]: null
+        },
+      }
+    });
   }
 
   // User data / null
   async findUserByPhone(phonenum) {
-    return await db.User.findOne({ where: { phonenum } });
-  }
-  // User data / null
+    return await db.User.findOne({
+      attributes: [
+        'userUID',
+        'password',
+        'email',
+        'phonenum',
+      ],
+      where: {
+        phonenum,
+        deletedAt: {
+          [Op.is]: null
+        },
+
+      }
+    });
+  };
+
+  // User data / null       이거 안보이는데...
   async findUserByUID(userUID) {
-    return await db.User.findOne({ where: { userUID } });
+    return await db.User.findOne({
+      where: {
+        userUID,
+        deletedAt: {
+          [Op.is]: null
+        },
+      }
+    });
   };
 
   // 0 / 1
@@ -47,6 +84,9 @@ class AuthLogic {
           transaction
         });
         return await db.User.findOne({
+          attributes: [
+            'point'
+          ],
           where: { userUID: UserUserUID },
           transaction
         })
@@ -87,6 +127,35 @@ class AuthLogic {
     } catch (err) {
       console.error('ERROR! /auth/createPurchaseRecord', err, err.message);
       return { result: false, Error: err.message };
+    }
+  }
+
+  async updatePassword(email, password) {
+    return await db.User.update({ password }, {
+      where: {
+        email,
+        deletedAt: {
+          [Op.is]: null
+        },
+      }
+    })
+  }
+
+  async sendPasswordMail(target, password) {
+    try {
+      const transporter = nodemailer.createTransport(mailerConfig);
+      const info = await transporter.sendMail({
+        from: mailerConfig.auth.user,
+        to: target,
+        subject: 'MSA Express 비밀번호 설정입니다.',
+        text: `비밀번호는 ${password} 입니다. \n로그인 후 변경해주세요.`
+      });
+      console.log('email is sented to ', target, info.messageId);
+
+      return true;
+    } catch (err) {
+      console.error(`Error | send Password Mail `, err);
+      return err;
     }
   }
 }
