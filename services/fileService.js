@@ -1,4 +1,5 @@
 import express from 'express';
+import path from 'path';
 import portFinder from 'portfinder';
 import { nanoid } from 'nanoid';
 import morgan from 'morgan';
@@ -7,16 +8,15 @@ import session from 'express-session';
 import passport from 'passport';
 
 import ConsulManager from '../utils/ConsulManager.js';
-import { db } from '../models/AuthIndex.js';
 import { RedisConn } from '../utils/RedisConnector.js';
 import { sessionConfig } from '../utils/ConfigManager.js'
-
-import authRouter from '../routers/authRouter.js';
 import passportConfig from '../utils/passportConfig.js';
-import '../amqp/authHandler.js';
+
+import fileRouter from '../routers/fileRouter.js';
 
 const node_env = process.env.NODE_ENV === "production" ? "production" : "dev";
-console.log('[CHECK ENV] : ', node_env);
+const __dirname = path.resolve();
+console.log('[CHECK ENV] : ', node_env, __dirname);
 
 async function main() {
   const serviceType = process.argv[2];
@@ -32,10 +32,9 @@ async function main() {
   process.on('SIGINT', data => authConsul.unregisterService(data));
   process.on('uncaughtException', data => authConsul.unregisterService(data));
 
-  app.use(express.json());    // 기존 body-parser 내장화
-  app.use(express.urlencoded({ extended: true }));
+  // app.use(express.json());    // 기존 body-parser 내장화
+  // app.use(express.urlencoded({ extended: true }));
 
-  db.sequelize.sync();
   passportConfig(passport);
 
   app.use(morgan('dev'));
@@ -46,15 +45,18 @@ async function main() {
   app.use(passport.initialize());   // req에 passport 적용
   app.use(passport.session());      // req.session에 passport info 설정
 
-  app.use('/auth', authRouter);
+  app.use('/static', express.static(path.join(__dirname, '../statics')));
+  app.use('/img', express.static(path.join(__dirname, '../images')));
+  app.use('/file', fileRouter);
 
   app.use((err, req, res, next) => {
     console.log('err last handler', err);
     res.status(err.code || 500).json({ Error: err.message });
   });
 
+  // Error 도 없고, 페이지도 없고,
   app.use((req, res, next) => {
-    res.status(404).json({ Error: 'Not Found' });
+    res.sendStatus(404).send('Not Found.');
   });
 
   app.listen(PORT, () => {

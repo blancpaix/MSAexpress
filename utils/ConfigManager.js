@@ -33,7 +33,6 @@ export const redisConfig = {
     return delay;
   },
   maxRetriesPerRequest: 1,
-  // ttl 은 나중에 꼭 추가합시다
   ttl: 10   // in seconds
 };
 

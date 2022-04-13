@@ -141,6 +141,7 @@ class AuthLogic {
     })
   }
 
+  // 메일러는 서버 분리가 더 좋아보임. worker 도 괜찮을듯??
   async sendPasswordMail(target, password) {
     try {
       const transporter = nodemailer.createTransport(mailerConfig);
