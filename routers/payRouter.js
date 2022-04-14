@@ -57,47 +57,46 @@ router.route('/item/:itemId')
     res.send(true);
   }));
 
-router.route('/checkout/:itemUID')
-  .post(isActivate, async (req, res, next) => {
-    let purchaseUID = null;
-    try {
-      const itemUID = req.params.itemUID;
-      if (!itemUID) return res.status(412).json({ Error: '상품 번호가 잘못되었습니다.' });
-      const userUID = req.session.passport.user.userUID;
-      const { count, price, discount, type, remark } = req.body;
-      if (typeof count !== "number" || typeof price !== "number" || typeof type !== "string")
-        return res.status(412).json({ Error: '결제 수단, 가격, 수량을 다시 확인해주세요.' });
+router.post('/checkout/:itemUID', isActivate, async (req, res, next) => {
+  let purchaseUID = null;
+  try {
+    const itemUID = req.params.itemUID;
+    if (!itemUID) return res.status(412).json({ Error: '상품 번호가 잘못되었습니다.' });
+    const userUID = req.session.passport.user.userUID;
+    const { count, price, discount, type, remark } = req.body;
+    if (typeof count !== "number" || typeof price !== "number" || typeof type !== "string")
+      return res.status(412).json({ Error: '결제 수단, 가격, 수량을 다시 확인해주세요.' });
 
-      const selectedItem = await PayLogics.findItemById(itemUID);
-      if (!selectedItem)
-        return res.status(412).json({ Error: '해당 상품을 찾을 수 없습니다.' });
-      if (selectedItem.price !== price)
-        return res.status(412).json({ Error: '상품 가격이 일치하지 않습니다.' });
-      if (selectedItem.count - count < 0)
-        return res.status(412).json({ Error: '재고가 부족합니다.' });
+    const selectedItem = await PayLogics.findItemById(itemUID);
+    if (!selectedItem)
+      return res.status(412).json({ Error: '해당 상품을 찾을 수 없습니다.' });
+    if (selectedItem.price !== price)
+      return res.status(412).json({ Error: '상품 가격이 일치하지 않습니다.' });
+    if (selectedItem.count - count < 0)
+      return res.status(412).json({ Error: '재고가 부족합니다.' });
 
-      const result = await PayLogics.recordPurchase(count, price, discount, type, userUID, remark, itemUID);
-      purchaseUID = result.idx;
+    const result = await PayLogics.recordPurchase(count, price, discount, type, userUID, remark, itemUID);
+    purchaseUID = result.idx;
 
-      const reply = await amqpRequest.send('auth_queue', {
-        event: 'purchase',
-        value: {
-          type,
-          remark,
-          pay: (price * count) - discount,
-          purchaseUID,
-          userUID,
-        }
-      });
+    const reply = await amqpRequest.send('auth_queue', {
+      event: 'purchase',
+      value: {
+        type,
+        remark,
+        pay: (price * count) - discount,
+        purchaseUID,
+        userUID,
+      }
+    });
 
-      if (reply.Error) throw Error(reply.Error);
-      res.status(200).json(reply);
-    } catch (err) {
-      if (purchaseUID) await PayLogics.deletePurchase(purchaseUID);
-      console.error('Error! POST /pay/checkout/:itemId]', err);
-      next({ code: 412, message: err.message });
-    }
-  });
+    if (reply.Error) throw Error(reply.Error);
+    res.status(200).json(reply);
+  } catch (err) {
+    if (purchaseUID) await PayLogics.deletePurchase(purchaseUID);
+    console.error('Error! POST /pay/checkout/:itemId]', err);
+    next({ code: 412, message: err.message });
+  }
+});
 
 
 router.get('/purchases', isActivate, asyncHandler(async (req, res) => {

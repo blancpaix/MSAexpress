@@ -48,17 +48,9 @@ pay-serive : pay_msa
       itemUID(items)
     },
 
-
-
 ========================================
-etc-service : etc_msa
-  db3: etc-msa
-    BOARD : {
-      timestamp, userUID, displayName, password, title, content
-    },
-    COMMENT: {
-      timestamp, userUID, displayName, password, comment
-    }
+file-service
+  for static files
 
 
 
@@ -82,21 +74,5 @@ DataTypes.DATEONLY   // DATE without time
 {  type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4 // Or DataTypes.UUIDV1 }
 
 
-paranoid : 삭제시 deletedAt 값 설ㅈ어, destroy ({where}, {force : true})로 완전 삭제
+paranoid : 삭제시 deletedAt 값 설정, destroy ({where}, {force : true})로 완전 삭제
 const User = sequelize.define(modelName, attr, opts)
-================
-const User extends {
-  id (idx 이거는 자동으로 삭제되는가보다?) pk 라서?
-};
-
-const userModel = User.init({
-  attr
-}, {
-  // other model opts
-  sequelize, // pass the connection instance
-  modelName : 'Sample'
-});
-이 방법으로는 한번에 통합하기 힘들듯
-
-
-sequelize.sync() 하면 table 생성

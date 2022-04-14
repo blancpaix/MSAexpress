@@ -5,9 +5,10 @@ import multer from 'multer';
 import { isActivate } from './middlewares/sessionChecker.js';
 
 // form 형식 multipart/form-data 설정 필요 (front)
+const __dirname = path.resolve();
 
 const router = express.Router();
-fs.readdir('../images', (err) => {
+fs.readdir(path.join(__dirname, '/images'), (err) => {
   if (err) {
     console.error('./images 폴더가 존재하지 않아 생성합니다.');
     fs.mkdirSync('images')
@@ -26,7 +27,7 @@ const multerOpts = {
     }
   }),
   limits: {
-    fileSize: 4 * 1024 * 1024,
+    fileSize: 5 * 1024 * 1024,
     files: 5,
   },
   fileFilter: (req, file, cb) => {
@@ -37,23 +38,32 @@ const multerOpts = {
       return cb(new Error('jpg, .jpeg, png, .webp 확장자만 등록할 수 있습니다.'));
     }
   }
-}
+};
+
 const imgUpload = multer(multerOpts).single('img');
 const imgsUpload = multer(multerOpts).array('img');
 
+// 반환된 이미지 파일 명은 fileServierDomain:port/img/filename 으로 접근
+// db 저장된 이미지파일은 split("|")로 나눈 후 앞에 등록한 사람의 email 주소를 붙이면 불러올 수 있음
+// item upload 하는 사람은 고유하기때문에 다른 사람이 어떻게 할 수가 없지 ㅎㅎㅎ
+
 router.post('/img', isActivate, imgUpload, (req, res) => {
-  // console.log('업로드 완료된거지??', req.file);
   res.json({ url: `/img/${req.file.filename}` });
 });
 
 router.post('/imgs', isActivate, imgsUpload, (req, res) => {
-  // console.log('업로드 확인??', req.files);
-  const arr = [];
+  const images = [];
+  let dbImg = '';
   req.files.map((data, index) => {
-    arr[index] = data.filename;
+    images[index] = data.filename;
+    const timeExt = data.filename.split("_");
+    if (index === 0) {
+      dbImg += timeExt[timeExt.length - 1];
+    } else {
+      dbImg += "|" + timeExt[timeExt.length - 1];
+    }
   });
-
-  res.json(arr);
+  res.json({ uploadText: dbImg, images });
 });
 
 

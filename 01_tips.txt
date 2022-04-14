@@ -39,3 +39,13 @@ res.status(STATE_CODE).send('alhpa');
 
 process.env.NODE_ENV = "production" 이면 error.stack 이게 안뜬다는건가??
 
+
+forever package
+forever start app.js
+forever stop app.js
+forever list
+
+
+consul 서비스 추가와 제거는 신중하게 해야할듯
+서비스 프로세스 강제 종료시 consul 에 등록된 서비스가 제거되지 않음
+consul cli 로 강제적으로 종료시켜주고 다음 서비스 실행 해야 할듯

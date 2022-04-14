@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import connRedis from 'connect-redis';
 import session from 'express-session';
 import passport from 'passport';
+import consul from 'consul';
 
 import ConsulManager from '../utils/ConsulManager.js';
 import { db } from '../models/PayIndex.js';
@@ -16,20 +17,32 @@ import { RedisConn } from '../utils/RedisConnector.js';
 
 import { amqpRequest } from '../utils/mq/RequestFactory.js';
 
+const consulClient = consul();
+const serviceId = nanoid();
+// 클래스로 빼버리니까... 실행이 안됩니다...
+function unregisterService(err) {
+  err && console.error('|Consul| Unregister service!', err);
+  consulClient.agent.service.deregister(serviceId, () => {
+    console.log('process termiatnated. ', err);
+    process.exit(err ? 1 : 0);
+  });
+};
+
+process.on('exit', data => unregisterService(data));
+process.on('SIGINT', data => unregisterService(data));
+process.on('uncaughtException', data => unregisterService(data));
+
+
 async function main() {
   const serviceType = process.argv[2];
   const { pid } = process;
   const PORT = await portFinder.getPortPromise();
-  const serviceId = nanoid();
+
   const ADDRESS = process.env.ADDRESS || 'localhost';
   const payConsul = new ConsulManager(serviceType, serviceId, ADDRESS, PORT);
   const RedisStore = connRedis(session);
   const app = express();
   await amqpRequest.initialize();
-
-  process.on('exit', data => payConsul.unregisterService(data));
-  process.on('SIGINT', data => payConsul.unregisterService(data));
-  process.on('uncaughtException', data => payConsul.unregisterService(data));
 
   app.use(express.json());    // 기존 body-parser 내장화
   app.use(express.urlencoded({ extended: true }));
@@ -69,5 +82,4 @@ main().catch(err => {
   process.exit(1);
 });
 
-// cmd : nodemon --signal SIGINT payService.js pay-service
 // loadBalancer : path : /pay,   service: pay-service

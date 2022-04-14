@@ -1,5 +1,81 @@
-/auth/signup
-req.body = { email, password, displayname, phonenum }
+[Auth service]
+POST /auth/signin  (session required)
+  req.body = {email, password}
+  result : true / Error
 
-/auth/signin
-req.body = { email, password }
+POST /auth/signout (session required)
+  result : redirect to main page
+
+POST /auth/dropout (session required)
+  req.body = {phonenum, password}
+  result : redirect to main page / Error
+
+POST /auth/signup
+  req.body = { email, password, displayname, phonenum }
+  result : true / Error
+
+POST /auth/findid
+  req.body = {phonenum}
+  result : user's email / Error
+
+POST /auth/findpw
+  req.body = {email, phonenum}
+  result : true (send pw to user's email) / Error
+
+POST /auth/updatepw  (session required)
+  req.body = {password}
+  result : true / Error
+
+POST /auth/loadPoint (session required) 
+  req.body = {type, remark, load}
+  result : user's current point / Error
+
+
+[Pay service]
+GET /pay/items
+  req.params = { offset, currentPage}
+  result : item lists / empty array
+
+POST /pay/item  (session required) 
+  req.body = {title, price, discription, count, img}
+  result : item's UID / Error
+
+GET /pay/item/:itemId (session required) 
+  req.param = itemId
+  result : item / Error
+
+PATCH /pay/item/:itemId (session required) 
+  req.param = itemId
+  result : item / Error
+
+DELETE /pay/item/:itemId (session required) 
+  req.param = itemId
+  result : true / Error
+
+POST /pay/checkout/:itemUID (session required) 
+  req.param = itemUID
+  req.body = {count, price, discount, type, remark}
+  result : user's current point / Error
+
+GET /pay/purchases  (session required) 
+  req.params = { offset, currentPage }
+  result : purchase list / Error
+
+GET /pay/p[urchases/:purchaseUID  (session required) 
+  req.params = { purchaseUID }
+  result : purchase / Error
+
+
+
+[File service]
+POST /file/upload/img  (session required) 
+  result : uploaded image path / Error
+
+POST /file/upload/imgs  (session required) 
+  result : uploaded image file name / Error
+
+GET /file/img
+  result : image file / Error
+
+GET /file/static
+  result : static file / Error

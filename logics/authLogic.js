@@ -36,7 +36,6 @@ class AuthLogic {
         deletedAt: {
           [Op.is]: null
         },
-
       }
     });
   };
@@ -128,7 +127,7 @@ class AuthLogic {
       console.error('ERROR! /auth/createPurchaseRecord', err, err.message);
       return { result: false, Error: err.message };
     }
-  }
+  };
 
   async updatePassword(email, password) {
     return await db.User.update({ password }, {

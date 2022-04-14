@@ -13,16 +13,11 @@ const routing = [
     service: 'pay-service',
     index: 0,
   },
-  // {
-  //   path: '/chat',
-  //   service: 'chat-service',
-  //   index: 0,
-  // },
-  // {
-  //   path: '/etc',
-  //   service: 'etc-service',
-  //   index: 0,
-  // },
+  {
+    path: '/file',
+    service: 'file-service',
+    index: 0,
+  },
 ];
 
 const cache = new Map();
@@ -64,6 +59,7 @@ const consulList = (route) => {
 };
 
 const server = createServer(async (req, res) => {
+  // favicon 은 file route 로 뺄 수 있으면 그쪽으로 빼는게 좋을듯?
   if (req.url === "/favicon.ico") return;
   console.log('req.url', req.url);
 

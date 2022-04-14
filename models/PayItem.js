@@ -42,7 +42,7 @@ export default function (sequelize, DataTypes) {
       }
     },
     img: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
       allowNull: true,
     },
     manager: {    // user email

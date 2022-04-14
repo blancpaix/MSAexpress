@@ -1,10 +1,13 @@
 [Initialize]
 in CMD:
   consul agent -dev
+  localhost:8500
 
 in project directory:
-  npm run pay
-  npm run auth
+  nodemon
+    npm run nmauth
+    npm run nmpay
+    npm run nmfile
 
 run Redis-server.exe in local;
 
@@ -18,7 +21,7 @@ Single Endpoint (reverse proxyy)
   -Custom
     /auth
     /payment
-    /chat
+    /file
 
 Session
   storing in in-memory DB (Redis)
@@ -33,11 +36,12 @@ Server List
 Mesh Service tools
   Consul
 
+
 DB
   RDB
     auth-msa
     pay-msa
-    chat-msa
+    
   IN_MEMORY DB
     Redis for session
 

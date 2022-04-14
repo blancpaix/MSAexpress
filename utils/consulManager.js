@@ -28,10 +28,13 @@ export default class ConsulManger {
     })
   };
 
+  // 프로세스 강제 종료 시 실행확률이 굉장히 적습니다. 그래서 외부로 뺐습니다.
   unregisterService(err) {
     err && console.error('|Consul| Unregister service!', err, this.tags);
     consulClient.agent.service.deregister(this.id, () => {
       process.exit(err ? 1 : 0);
     });
   };
+
+
 }

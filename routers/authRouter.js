@@ -52,7 +52,7 @@ router.post('/dropout', isActivate, asyncHandler(async (req, res) => {
 
   req.logout();
   req.session.destroy(
-    () => res.redirect('/auth')
+    () => res.redirect('/')
   );
 }));
 

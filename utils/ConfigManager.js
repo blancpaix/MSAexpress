@@ -1,5 +1,7 @@
 import dotenv from 'dotenv';
-dotenv.config({ path: '../.env' });
+import path from 'path';
+const __dirname = path.resolve();
+dotenv.config({ path: path.join(__dirname, '/.env') });
 
 const dbSelector = () => {
   switch (process.argv[2]) {

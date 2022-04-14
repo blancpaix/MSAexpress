@@ -7,9 +7,12 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "loadbalancer": "nodemon frontLoadBalancer.js",
-    "pay": "nodemon --signal SIGINT app/services/payService.js pay-service",
-    "auth": "nodemon --signal SIGINT authService.js auth-service",
-    "etc": "nodemon --signal SIGINT etcService.js etc-service"
+    "nmauth": "nodemon --signal SIGINT ./services/authService.js auth-service",
+    "nmpay": "nodemon --signal SIGINT ./services/payService.js pay-service",
+    "nmfile": "nodemon --signal SIGINT ./services/fileService.js file-service",
+    "fvauth" : "forever --killSignal=SIGINT start ./services/authService.js auth-service",
+    "fvpay" : "forever --killSignal=SIGINT start ./services/payService.js pay-service",
+    "fvfile" : "forever --killSignal=SIGINT start ./services/fileService.js file-service"
   },
   "author": "blancpaix",
   "license": "ISC",
