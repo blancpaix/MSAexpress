@@ -15,14 +15,10 @@ import passportConfig from '../utils/passportConfig.js';
 
 import fileRouter from '../routers/fileRouter.js';
 
-const node_env = process.env.NODE_ENV === "production" ? "production" : "dev";
-const __dirname = path.resolve();
-console.log('[CHECK ENV] : ', node_env, __dirname);
-
 const consulClient = consul();
 const serviceId = nanoid();
 
-// 클래스로 빼버리니까 실행이 잘 안됩니다ㅠ
+// 클래스에 넣어버리니까 실행이 잘 안됩니다ㅠ
 function unregisterService(err) {
   err && console.error('|Consul| Unregister service!', err);
   consulClient.agent.service.deregister(serviceId, () => {
@@ -39,7 +35,7 @@ async function main() {
   const { pid } = process;
   const PORT = await portFinder.getPortPromise();
   const ADDRESS = process.env.ADDRESS || 'localhost';
-  const authConsul = new ConsulManager(serviceType, serviceId, ADDRESS, PORT);
+  const fileConsul = new ConsulManager(serviceType, serviceId, ADDRESS, PORT);
   const RedisStore = connRedis(session);
   const app = express();
 
@@ -58,7 +54,7 @@ async function main() {
 
   app.use('/file/static', express.static(path.join(__dirname, '/statics')));
   app.use('/file/img', express.static(path.join(__dirname, '/images')));
-  app.use('/file/upload', fileRouter);
+  app.use('/file/manage', fileRouter);
 
   app.use((err, req, res, next) => {
     if (!err) return res.sendStatus(404).send('Not Found.');
@@ -68,14 +64,14 @@ async function main() {
   });
 
   app.listen(PORT, () => {
-    authConsul.registerService();
+    fileConsul.registerService();
     console.log(`[SERVER] Started ${serviceType} at ${pid} on port : ${PORT}`);
   });
 };
 
 main().catch(err => {
-  console.error('|SERVER| err in auth-service', err);
+  console.error('|SERVER| err in file-service', err);
   process.exit(1);
 });
 
-// loadBalancer : path : /auth,   service: auth-service
+// loadBalancer : path : /file,   service: file-service

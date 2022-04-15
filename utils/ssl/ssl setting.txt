@@ -1,0 +1,13 @@
+linux
+
+Let's encrypt 무료 인증서 사용
+도메인 필요
+3개월마다 갱신
+
+
+certbot
+
+
+
+
+reverse proxy를 채택하고 있기 때문에 loadbalancer 에만 ssl 적용해도 괜찮음

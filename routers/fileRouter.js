@@ -2,16 +2,22 @@ import express from 'express';
 import path from 'path';
 import fs from 'fs';
 import multer from 'multer';
-import { isActivate } from './middlewares/sessionChecker.js';
-
-// form 형식 multipart/form-data 설정 필요 (front)
-const __dirname = path.resolve();
+import { isActivate, isAdmin } from './middlewares/sessionChecker.js';
 
 const router = express.Router();
+const __dirname = path.resolve();
+
+// form 형식 multipart/form-data 설정 필요 (front)
 fs.readdir(path.join(__dirname, '/images'), (err) => {
   if (err) {
-    console.error('./images 폴더가 존재하지 않아 생성합니다.');
+    console.error('images 폴더가 존재하지 않아 생성합니다.');
     fs.mkdirSync('images')
+  }
+});
+fs.readdir(path.join(__dirname, '/static'), (err) => {
+  if (err) {
+    console.error('static 폴더가 존재하지 않아 생성합니다.');
+    fs.mkdirSync('static')
   }
 });
 
@@ -65,6 +71,12 @@ router.post('/imgs', isActivate, imgsUpload, (req, res) => {
   });
   res.json({ uploadText: dbImg, images });
 });
+
+router.delete('/:imgid', isAdmin, (req, res, next) => {
+  // role??
+  console.log('req.param', req.params.imgid);
+  res.send('test');
+})
 
 
 export default router;

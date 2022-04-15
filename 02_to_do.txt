@@ -12,9 +12,3 @@ dataAccess Layer => models
 
 ============
 purchases, items pagination 하면 좋을듯??
-
-cors 설정
-
-
-
-

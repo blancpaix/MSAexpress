@@ -11,13 +11,10 @@ import ConsulManager from '../utils/ConsulManager.js';
 import { db } from '../models/AuthIndex.js';
 import { RedisConn } from '../utils/RedisConnector.js';
 import { sessionConfig } from '../utils/ConfigManager.js'
-
-import authRouter from '../routers/authRouter.js';
 import passportConfig from '../utils/passportConfig.js';
 import '../amqp/authHandler.js';
 
-const node_env = process.env.NODE_ENV === "production" ? "production" : "dev";
-console.log('[CHECK ENV] : ', node_env);
+import authRouter from '../routers/authRouter.js';
 
 const consulClient = consul();
 const serviceId = nanoid();
@@ -63,12 +60,16 @@ async function main() {
 
   app.use((err, req, res, next) => {
     console.log('err last handler', err);
-    res.status(err.code || 500).json({ Error: err.message });
+    let message;
+    if (err.message) message = err.message;
+    if (err.errors && err.errors[0].message) message = err.errors[0].message;
+    res.status(err.code || 500).json({ Error: message });
   });
 
   app.use((req, res, next) => {
     res.status(404).json({ Error: 'Not Found' });
   });
+
 
   app.listen(PORT, () => {
     authConsul.registerService();
@@ -78,6 +79,7 @@ async function main() {
 
 main().catch(err => {
   console.error('|SERVER| err in auth-service', err);
+  process.exit(1);
 });
 
 // loadBalancer : path : /auth,   service: auth-service

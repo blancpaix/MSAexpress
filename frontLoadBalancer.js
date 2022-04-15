@@ -1,6 +1,8 @@
 import { createServer } from 'http';
+import { createServer as sslCreateServer } from 'https';
 import httpProxy from 'http-proxy';
 import consul from 'consul';
+import { sslOptions } from './utils/ConfigManager.js';
 
 const routing = [
   {
@@ -48,7 +50,7 @@ const fetchServices = async (route) => {
 const consulList = (route) => {
   return new Promise((resolve, reject) => {
     consulClient.agent.service.list((err, services) => {
-      if (err) reject();
+      if (err) reject(new Error('Bad gateway.'));
       const servers = !err && Object.values(services)
         .filter(serv => serv.Tags.includes(route.service));
       cache.set(route.path, servers);
@@ -58,25 +60,42 @@ const consulList = (route) => {
   })
 };
 
-const server = createServer(async (req, res) => {
-  // favicon 은 file route 로 뺄 수 있으면 그쪽으로 빼는게 좋을듯?
-  if (req.url === "/favicon.ico") return;
-  console.log('req.url', req.url);
+const headers = {
+  "Access-Control-Allow-Origin": "*", // input your domain [http://DOMAIN, https://DOMAIN]
+  "Access-Control-Allow-Methods": "PATCH, POST, GET, DELETE",
+  "Access-Control-Max-Age": 1296000, // 15 days
+}
+
+const loadbalancing = async (req, res) => {
+  // favicon 은 클라이언트에서 요청 주소를 변경해야함  DOMAIN.com/file/static/favicon.ico
+  if (req.url === '/favicon.ico') return;
 
   const route = routing.find((route) => {
     return req.url.startsWith(route.path);
   });
 
   const servers = await fetchServices(route);
-
+  if (typeof servers === Error || !servers.length) res.status(502).end('Bad gateway.');
 
   route.index = (route.index + 1) % servers.length;
   const server = servers[route.index];
   console.log('server ', server);
   const target = `http://${server.Address}:${server.Port}`;
   proxy.web(req, res, { target });
+};
+
+
+const server = createServer(async (req, res) => {
+  res.writeHead(200, headers);
+  loadbalancing(req, res);
+});
+const sslServer = sslCreateServer(sslOptions, async (req, res) => {
+  loadbalancing(req, res);
 });
 
 server.listen(8080, () => {
   console.log('Load Balancer server started on 8080');
+});
+sslServer.listen(443, () => {
+  console.log('Load Balancer server with SSL started on 443');
 });

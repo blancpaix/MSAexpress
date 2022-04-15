@@ -13,7 +13,8 @@ export default function (passport) {
         userUID: user.userUID,
         email: user.email,
         displayname: user.displayname,
-        point: user.point
+        point: user.point,
+        role: user.role,
       };
       done(null, storeUser);
     })

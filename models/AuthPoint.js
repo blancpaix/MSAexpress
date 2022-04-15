@@ -29,11 +29,23 @@ export default function (sequelize, DataTypes) {
       type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 0,
+      validate: {
+        min: {
+          args: [0],
+          msg: "최소 지불 비용은 0 입니다."
+        }
+      }
     },
     load: {   // 적립
       type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 0,
+      validate: {
+        min: {
+          args: [0],
+          msg: "최소 충전 비용은 0 입니다."
+        }
+      }
     },
     purchaseUID: {
       type: DataTypes.INTEGER,

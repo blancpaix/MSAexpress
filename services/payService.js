@@ -9,13 +9,12 @@ import consul from 'consul';
 
 import ConsulManager from '../utils/ConsulManager.js';
 import { db } from '../models/PayIndex.js';
+import { RedisConn } from '../utils/RedisConnector.js';
 import { sessionConfig } from '../utils/ConfigManager.js';
+import passportConfig from '../utils/passportConfig.js';
+import { amqpRequest } from '../utils/mq/RequestFactory.js';
 
 import payRouter from '../routers/payRouter.js';
-import passportConfig from '../utils/passportConfig.js';
-import { RedisConn } from '../utils/RedisConnector.js';
-
-import { amqpRequest } from '../utils/mq/RequestFactory.js';
 
 const consulClient = consul();
 const serviceId = nanoid();
@@ -63,7 +62,10 @@ async function main() {
 
   app.use((err, req, res, next) => {
     console.log('err last handler', err);
-    res.status(err.code || 500).json({ Error: err.message });
+    let message;
+    if (err.message) message = err.message;
+    if (err.errors && err.errors[0].message) message = err.errors[0].message;
+    res.status(err.code || 500).json({ Error: message });
   });
 
   app.use((req, res, next) => {

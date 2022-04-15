@@ -1,7 +1,15 @@
 import dotenv from 'dotenv';
+import fs from 'fs';
 import path from 'path';
 const __dirname = path.resolve();
 dotenv.config({ path: path.join(__dirname, '/.env') });
+
+export const sslOptions = process.env.NODE_ENV === "production"
+  ? {
+    key: fs.readFileSync('./ssl/server-key.pem'),
+    cert: fs.readFileSync('./ssl/server-cert.pem'),
+    ca: [fs.readFileSync('./ssl/client-cert.pem')],
+  } : null;
 
 const dbSelector = () => {
   switch (process.argv[2]) {
@@ -58,4 +66,3 @@ export const mailerConfig = {
     pass: process.env.MAILER_PASSWORD,
   }
 };
-

@@ -9,7 +9,7 @@ export function notActivate(req, res, next) {
   return res.status(403).send('로그아웃이 필요합니다.');
 };
 
-// session의 email값과 req.body의manager값 일치
+// session의 email값과 req.body의 manager값 일치
 export function isOwn(req, res, next) {
   if (req.isAuthenticated()) {
     const userData = JSON.parse(req.user);
@@ -21,3 +21,11 @@ export function isOwn(req, res, next) {
   return res.status(401).send('권한이 없습니다.');
 };
 
+export function isAdmin(req, res, next) {
+  if (req.isAuthenticated()) {
+    const user = JSON.parse(req.user);
+    if (user.passport.user.role === 3) return next();
+  };
+
+  return res.status(401).send('권한이 없습니다.');
+};
