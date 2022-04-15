@@ -58,16 +58,14 @@ async function main() {
 
   app.use('/auth', authRouter);
 
+
   app.use((err, req, res, next) => {
     console.log('err last handler', err);
+    if (!err) return res.status(404).json({ Error: 'Not Found' });
     let message;
     if (err.message) message = err.message;
     if (err.errors && err.errors[0].message) message = err.errors[0].message;
     res.status(err.code || 500).json({ Error: message });
-  });
-
-  app.use((req, res, next) => {
-    res.status(404).json({ Error: 'Not Found' });
   });
 
 

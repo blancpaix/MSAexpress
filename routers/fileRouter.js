@@ -2,7 +2,8 @@ import express from 'express';
 import path from 'path';
 import fs from 'fs';
 import multer from 'multer';
-import { isActivate, isAdmin } from './middlewares/sessionChecker.js';
+import { isActivate, isOwnFile, isAdmin } from './middlewares/sessionChecker.js';
+import { FileLogics } from '../logics/fileLogic.js';
 
 const router = express.Router();
 const __dirname = path.resolve();
@@ -53,30 +54,39 @@ const imgsUpload = multer(multerOpts).array('img');
 // db 저장된 이미지파일은 split("|")로 나눈 후 앞에 등록한 사람의 email 주소를 붙이면 불러올 수 있음
 // item upload 하는 사람은 고유하기때문에 다른 사람이 어떻게 할 수가 없지 ㅎㅎㅎ
 
-router.post('/img', isActivate, imgUpload, (req, res) => {
-  res.json({ url: `/img/${req.file.filename}` });
+router.get('/img/:itemUID', isActivate, async (req, res) => {
+  return await FileLogics.getImages(req.params.itemUID);
 });
 
-router.post('/imgs', isActivate, imgsUpload, (req, res) => {
-  const images = [];
-  let dbImg = '';
-  req.files.map((data, index) => {
-    images[index] = data.filename;
-    const timeExt = data.filename.split("_");
-    if (index === 0) {
-      dbImg += timeExt[timeExt.length - 1];
-    } else {
-      dbImg += "|" + timeExt[timeExt.length - 1];
-    }
-  });
-  res.json({ uploadText: dbImg, images });
-});
-
-router.delete('/:imgid', isAdmin, (req, res, next) => {
-  // role??
-  console.log('req.param', req.params.imgid);
-  res.send('test');
+router.delete('/img/:filename', isOwnFile, async (req, res) => {
+  return await FileLogics.deleteImage(req.params.filename);
 })
+
+router.post('/img', isActivate, imgUpload, async (req, res) => {
+  const img = await FileLogics.uploadImage(req.file.filename);
+  res.status(200).json({ img });
+});
+
+router.post('/imgs', isActivate, imgsUpload, async (req, res) => {
+  // imgUID, name, null(itemUID)
+  const imgs = await FileLogics.uploadImages(req.files);
+  res.status(200).send({ imgs })
+});
+
+
+// delete single image
+router.delete('/admin/:filename', isAdmin, async (req, res, next) => {
+  await FileLogics.deleteImage(req.params.filename);
+  res.status(200).send(true);
+});
+
+// delete multiple images
+router.delete('/admin', isAdmin, async (req, res, next) => {
+  // filenames : [filename, filename, ...]
+  const { filenames } = req.body;
+  await FileLogics.deleteImages(filenames);
+  res.status(200).send(true);
+});
 
 
 export default router;

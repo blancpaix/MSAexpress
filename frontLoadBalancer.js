@@ -75,7 +75,7 @@ const loadbalancing = async (req, res) => {
   });
 
   const servers = await fetchServices(route);
-  if (typeof servers === Error || !servers.length) res.status(502).end('Bad gateway.');
+  if (typeof servers === Error || !servers.length) return res.status(502).end('Bad gateway.');
 
   route.index = (route.index + 1) % servers.length;
   const server = servers[route.index];

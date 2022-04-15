@@ -61,21 +61,41 @@ GET /pay/purchases  (session required)
   req.params = { offset, currentPage }
   result : purchase list / Error
 
-GET /pay/p[urchases/:purchaseUID  (session required) 
+GET /pay/purchases/:purchaseUID  (session required) 
   req.params = { purchaseUID }
   result : purchase / Error
 
 
 
 [File service]
+GET /file/upload/img/:itemUID  (session required) 
+  result : images data / Error
+
+DELETE /file/upload/img/:filename  (session required) 
+  result : true / Error
+
 POST /file/upload/img  (session required) 
-  result : uploaded image path / Error
+  result : uploaded image data / Error
 
 POST /file/upload/imgs  (session required) 
-  result : uploaded image file name / Error
+  result : uploaded images data / Error
+
+DELETE /file/upload/admin/:filename  (admin role required) 
+  result : true / Error
+
+DELETE /file/upload/admin  (admin role required) 
+  req.body = { filenames }
+  result : true / Error
 
 GET /file/img
   result : image file / Error
 
 GET /file/static
   result : static file / Error
+
+
+
+TODO 
+POST /pay/item
+PATCH /pay/item
+  File service 와 상호연동 필요

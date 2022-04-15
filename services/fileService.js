@@ -9,6 +9,7 @@ import passport from 'passport';
 import consul from 'consul';
 
 import ConsulManager from '../utils/ConsulManager.js';
+import { db } from '../models/FileIndex.js'
 import { RedisConn } from '../utils/RedisConnector.js';
 import { sessionConfig } from '../utils/ConfigManager.js'
 import passportConfig from '../utils/passportConfig.js';
@@ -42,6 +43,7 @@ async function main() {
   app.use(express.json());    // 기존 body-parser 내장화
   app.use(express.urlencoded({ extended: true }));
 
+  db.sequelize.sync();
   passportConfig(passport);
 
   app.use(morgan('dev'));
@@ -55,6 +57,7 @@ async function main() {
   app.use('/file/static', express.static(path.join(__dirname, '/statics')));
   app.use('/file/img', express.static(path.join(__dirname, '/images')));
   app.use('/file/manage', fileRouter);
+
 
   app.use((err, req, res, next) => {
     if (!err) return res.sendStatus(404).send('Not Found.');
