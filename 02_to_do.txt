@@ -11,6 +11,4 @@ dataAccess Layer => models
 
 
 ============
-purchases, items pagination 하면 좋을듯??
-
 item 등록시 file update => amqp handler 사용 필요...

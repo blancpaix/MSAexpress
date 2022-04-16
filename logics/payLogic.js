@@ -4,7 +4,7 @@ import { Op } from 'sequelize';
 class PayLogic {
 
   // return [] / [arr]
-  async getItems() {
+  async getItems(page, limit) {
     return await db.Item.findAll({
       attributes: [
         'itemUID',
@@ -15,12 +15,16 @@ class PayLogic {
         'manager',
         'updatedAt'
       ],
-      limit: 8,
       where: {
         deletedAt: {
           [Op.is]: null
         }
-      }
+      },
+      order: [
+        ['itemUID', 'DESC'],
+      ],
+      offset: limit * (page - 1),
+      limit,
     });
   }
 
@@ -89,7 +93,7 @@ class PayLogic {
     })
   };
 
-  async getPurchases(userUID) {
+  async getPurchases(userUID, page, limit) {
     return await db.Purchase.findAll({
       attributes: [
         'idx',
@@ -101,7 +105,12 @@ class PayLogic {
         'createdAt',
         'ItemItemUID',
       ],
-      where: { userUID }
+      where: { userUID },
+      order: [
+        ['idx', 'DESC'],
+      ],
+      offset: limit * (page - 1),
+      limit,
     })
   };
 

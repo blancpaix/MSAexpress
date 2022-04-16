@@ -8,7 +8,9 @@ import { amqpRequest } from '../utils/mq/RequestFactory.js';
 const router = express.Router();
 
 router.get('/items', asyncHandler(async (req, res) => {
-  const itemList = await PayLogics.getItems();
+  const page = req.query.page ? parseInt(req.query.page) : 1;
+  const limit = req.query.limit ? parseInt(req.query.limit) : 30;
+  const itemList = await PayLogics.getItems(parseInt(page), parseInt(limit));
   res.status(200).json(itemList);
 }));
 
@@ -101,7 +103,10 @@ router.post('/checkout/:itemUID', isActivate, async (req, res, next) => {
 
 router.get('/purchases', isActivate, asyncHandler(async (req, res) => {
   const userUID = req.session.passport.user.userUID;
-  const result = await PayLogics.getPurchases(userUID);
+  const page = req.query.page ? parseInt(req.query.page) : 1;
+  const limit = req.query.limit ? parseInt(req.query.limit) : 30;
+
+  const result = await PayLogics.getPurchases(userUID, page, limit);
   res.json(result);
 }));
 
