@@ -1,5 +1,5 @@
 export default function (sequelize, DataTypes) {
-  return sequelize.define('User', {
+  return sequelize.define('File', {
     imageUID: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
@@ -21,7 +21,7 @@ export default function (sequelize, DataTypes) {
     },
   }, {
     timestamps: true,
-    createdAt: true,
+    createdAt: false,
     updatedAt: false,
     paranoid: true,
   })

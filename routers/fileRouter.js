@@ -25,7 +25,7 @@ fs.readdir(path.join(__dirname, '/static'), (err) => {
 const multerOpts = {
   storage: multer.diskStorage({
     destination: (req, file, cb) => {
-      cb(null, '../images');
+      cb(null, path.join(__dirname, '/images'));
     },
     filename: (req, file, cb) => {
       const email = req.session.passport.user.email;

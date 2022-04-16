@@ -42,8 +42,9 @@ export default function (sequelize, DataTypes) {
       }
     },
     img: {
-      type: DataTypes.TEXT,
+      type: DataTypes.BOOLEAN,
       allowNull: true,
+      defaultValue: false,
     },
     manager: {    // user email
       type: DataTypes.STRING,

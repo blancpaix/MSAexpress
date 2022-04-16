@@ -14,14 +14,39 @@ router.get('/items', asyncHandler(async (req, res) => {
   res.status(200).json(itemList);
 }));
 
-router.post('/item', isActivate, asyncHandler(async (req, res) => {
-  const { title, price, discription, count, img } = req.body;
-  if (typeof title !== "string" || typeof price !== "number" || typeof count !== "number")
-    return res.status(412).json({ Error: '제품명, 가격, 수량 값을 다시 확인해주세요.' });
+router.post('/item', isActivate, asyncHandler(async (req, res, next) => {
+  let itemUID = null;
+  try {
+    const { title, price, discription, count, img } = req.body;
+    if (typeof title !== "string" || typeof price !== "number" || typeof count !== "number")
+      return res.status(412).json({ Error: '제품명, 가격, 수량 값을 다시 확인해주세요.' });
 
-  const manager = req.session.passport.user.email;
-  const result = await PayLogics.registerItem(title, price, count, img, discription, manager);
-  res.status(200).send(result.itemUID.toString());
+    const isImg = img.length > 0;
+    console.log(isImg);
+
+    // const manager = req.session.passport.user.email;
+    const manager = '1@1.com';
+    const result = await PayLogics.registerItem(title, price, count, isImg, discription, manager);
+    itemUID = result.itemUID;
+
+    if (isImg) {
+      const reply = await amqpRequest.send('file_queue', {
+        event: 'postItem',
+        value: {
+          img,
+          itemUID: result.itemUID
+        }
+      });
+
+      if (reply.Error) throw Error(reply.Error);
+    }
+
+    res.status(200).send(result.itemUID.toString());
+  } catch (err) {
+    if (itemUID) await PayLogics.deleteItemForce(itemUID);
+    console.error('Error! /pay/item POST', err);
+    next({ code: 412, message: err.message });
+  }
 }));
 
 

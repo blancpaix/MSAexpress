@@ -33,7 +33,6 @@ class PayLogic {
     const result = await db.Item.create({
       title, price, count, img, discription, manager
     }, { field: ['title'] })
-    console.log('result?', result);
     return result;
   }
   // return error / item Data
@@ -68,6 +67,11 @@ class PayLogic {
   // return 0 / 1
   async deleteItem(itemUID) {
     return await db.Item.destroy({ where: { itemUID } })
+  }
+
+  // return 0 / 1
+  async deleteItemForce(itemUID) {
+    return await db.Item.destroy({ where: { itemUID }, force: true })
   }
 
   // return Purcahse Obj
@@ -120,7 +124,7 @@ class PayLogic {
         idx: purchaseUID,
       }
     })
-  }
+  };
 
 
 }

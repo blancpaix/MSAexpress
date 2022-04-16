@@ -13,11 +13,13 @@ import { db } from '../models/FileIndex.js'
 import { RedisConn } from '../utils/RedisConnector.js';
 import { sessionConfig } from '../utils/ConfigManager.js'
 import passportConfig from '../utils/passportConfig.js';
+import '../amqp/fileHandler.js';
 
 import fileRouter from '../routers/fileRouter.js';
 
 const consulClient = consul();
 const serviceId = nanoid();
+const __dirname = path.resolve();
 
 // 클래스에 넣어버리니까 실행이 잘 안됩니다ㅠ
 function unregisterService(err) {

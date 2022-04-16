@@ -17,6 +17,8 @@ const dbSelector = () => {
       return process.env.DB_AUTH;
     case 'pay-service':
       return process.env.DB_PAY;
+    case 'file-service':
+      return process.env.DB_FILE;
     case 'etc-service':
       return process.env.DB_ETC;
     default:

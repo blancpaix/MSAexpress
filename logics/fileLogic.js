@@ -4,7 +4,7 @@ import { db } from '../models/FileIndex.js';
 class FileLogic {
 
   async getImages(itemUID) {
-    return await db.Image.findAll({
+    return await db.File.findAll({
       where: {
         itemUID,
         deletedAt: {
@@ -15,13 +15,13 @@ class FileLogic {
   }
 
   async deleteImage(name) {
-    return await db.Image.destroy({
+    return await db.File.destroy({
       where: { name }
     });
   };
 
   async deleteImages(filenames) {
-    return await db.Image.destroy({
+    return await db.File.destroy({
       where: {
         name: filenames
       }
@@ -36,25 +36,28 @@ class FileLogic {
   // return images data / Error
   async uploadImages(names) {
     const uploadData = names.map(data => ({ name: data.filename }));
-    return await db.Image.bulkCreate(uploadData);
+    return await db.File.bulkCreate(uploadData);
   }
 
   // imgUIDs : [imgUID, ... ],
   // return true / Error
-  async updateReference(imgUIDs, itemUID) {
-    await db.Image.update({
-      itemUID
-    }, {
-      where: {
-        imgUID: [imgUIDs]
-      }
-    });
-    return true;
+  async updateReference(itemUID, img) {
+    try {
+      await db.File.update({
+        itemUID
+      }, {
+        where: {
+          name: [img]
+        }
+      });
+      return { result: true }
+    } catch (err) {
+      console.error('Error! update Reference', err, err.message);
+      return { result: false, Error: err.message };
+    }
   }
 
-
 }
-
 
 
 export const FileLogics = new FileLogic();
