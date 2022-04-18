@@ -8,17 +8,14 @@ const main = async () => {
   });
 
   amqpReplier.handleRequests(async req => {
-    console.log('## request in Auth-handler ##', req);
-
     switch (req.event) {
       case 'purchase':
         const { type, remark, pay, purchaseUID, userUID } = req.value;
-        const record = await AuthLogics.createPurchaseRecord(type, remark, pay, purchaseUID, userUID);
-        return record;
+        return await AuthLogics.createPurchaseRecord(type, remark, pay, purchaseUID, userUID);
+
       default:
         return;
     }
-
   })
 };
 

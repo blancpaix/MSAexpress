@@ -49,7 +49,7 @@ async function main() {
   db.sequelize.sync();
   passportConfig(passport);
 
-  app.use(morgan('dev'));
+  app.use(morgan(process.env.NODE_ENV === 'production' ? ':id :method :url :response-time' : 'dev'));
   app.use(session({
     ...sessionConfig,
     store: new RedisStore({ client: RedisConn }),

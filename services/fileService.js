@@ -42,13 +42,13 @@ async function main() {
   const RedisStore = connRedis(session);
   const app = express();
 
-  app.use(express.json());    // 기존 body-parser 내장화
+  app.use(express.json());    // 기존 body-parser 내장화 
   app.use(express.urlencoded({ extended: true }));
 
   db.sequelize.sync();
   passportConfig(passport);
 
-  app.use(morgan('dev'));
+  app.use(morgan(process.env.NODE_ENV === 'production' ? ':id :method :url :response-time' : 'dev'));
   app.use(session({
     ...sessionConfig,
     store: new RedisStore({ client: RedisConn }),

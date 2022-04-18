@@ -1,5 +1,4 @@
 export function isActivate(req, res, next) {
-  // console.log('req.user in SessionCheck.js', req.user);
   if (req.isAuthenticated()) return next();
   return res.status(403).send('로그인이 필요합니다.');
 }
@@ -32,7 +31,7 @@ export function isOwnFile(req, res, next) {
   return res.status(401).send('권한이 없습니다.');
 }
 
-export function isAdmin(req, res, next) {
+export function isManager(req, res, next) {
   if (req.isAuthenticated()) {
     const user = JSON.parse(req.user);
     if (user.passport.user.role === 3) return next();

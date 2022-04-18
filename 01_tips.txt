@@ -43,7 +43,9 @@ process.env.NODE_ENV = "production" 이면 error.stack 이게 안뜬다는건가
 forever package
 forever start app.js
 forever stop app.js
+forever stopall
 forever list
+forever logs
 
 
 consul 서비스 추가와 제거는 신중하게 해야할듯

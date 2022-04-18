@@ -11,6 +11,7 @@ router.get('/items', asyncHandler(async (req, res) => {
   const page = req.query.page ? parseInt(req.query.page) : 1;
   const limit = req.query.limit ? parseInt(req.query.limit) : 30;
   const itemList = await PayLogics.getItems(parseInt(page), parseInt(limit));
+
   res.status(200).json(itemList);
 }));
 
@@ -22,10 +23,8 @@ router.post('/item', isActivate, asyncHandler(async (req, res, next) => {
       return res.status(412).json({ Error: '제품명, 가격, 수량 값을 다시 확인해주세요.' });
 
     const isImg = img.length > 0;
-    console.log(isImg);
+    const manager = req.session.passport.user.email;
 
-    // const manager = req.session.passport.user.email;
-    const manager = '1@1.com';
     const result = await PayLogics.registerItem(title, price, count, isImg, discription, manager);
     itemUID = result.itemUID;
 
@@ -39,7 +38,7 @@ router.post('/item', isActivate, asyncHandler(async (req, res, next) => {
       });
 
       if (reply.Error) throw Error(reply.Error);
-    }
+    };
 
     res.status(200).send(result.itemUID.toString());
   } catch (err) {
@@ -51,9 +50,10 @@ router.post('/item', isActivate, asyncHandler(async (req, res, next) => {
 
 
 // router.route()로 Post를 정상적으로 사용하기 어려움
-router.route('/item/:itemId')
+router.route('/item/:itemUID')
   .get(isActivate, asyncHandler(async (req, res) => {
-    const item = await PayLogics.findItemById(req.params.itemId);
+    const item = await PayLogics.findItemById(req.params.itemUID);
+
     res.status(200).json(item);
   }))
   .patch(isOwn, asyncHandler(async (req, res) => {
@@ -75,13 +75,14 @@ router.route('/item/:itemId')
       if (typeof img !== "string") return res.status(412).json({ Error: '이미지 경로를 다시 확인해주세요.' })
       patchObj.img = img;
     }
+    const result = await PayLogics.patchItem({ itemUID: req.params.itemUID, value: patchObj });
 
-    const result = await PayLogics.patchItem({ itemUID: req.params.itemId, value: patchObj });
     res.status(200).json(result);
   }))
   .delete(isOwn, asyncHandler(async (req, res) => {
-    await PayLogics.deleteItem(req.params.itemId);
-    res.send(true);
+    const result = await PayLogics.deleteItem(req.params.itemUID);
+
+    res.send(result);
   }));
 
 router.post('/checkout/:itemUID', isActivate, async (req, res, next) => {
@@ -125,19 +126,19 @@ router.post('/checkout/:itemUID', isActivate, async (req, res, next) => {
   }
 });
 
-
 router.get('/purchases', isActivate, asyncHandler(async (req, res) => {
   const userUID = req.session.passport.user.userUID;
   const page = req.query.page ? parseInt(req.query.page) : 1;
   const limit = req.query.limit ? parseInt(req.query.limit) : 30;
-
   const result = await PayLogics.getPurchases(userUID, page, limit);
+
   res.json(result);
 }));
 
 router.get('/purchase/:purchaseUID', isActivate, asyncHandler(async (req, res) => {
   const userUID = req.session.passport.user.userUID;
   const result = await PayLogics.getPurchase(req.params.purchaseUID, userUID);
+
   res.json(result);
 }))
 

@@ -19,7 +19,7 @@ import authRouter from '../routers/authRouter.js';
 const consulClient = consul();
 const serviceId = nanoid();
 
-// 클래스로 빼버리니까... 실행이 안됩니다...
+// 클래스로 빼니까 실행이 잘 안됩니다...
 function unregisterService(err) {
   err && console.error('|Consul| Unregister service!', err);
   consulClient.agent.service.deregister(serviceId, () => {
@@ -48,7 +48,7 @@ async function main() {
   db.sequelize.sync();
   passportConfig(passport);
 
-  app.use(morgan('dev'));
+  app.use(morgan(process.env.NODE_ENV === 'production' ? ':id :method :url :response-time' : 'dev'));
   app.use(session({
     ...sessionConfig,
     store: new RedisStore({ client: RedisConn }),

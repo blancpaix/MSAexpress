@@ -6,7 +6,7 @@ import { mailerConfig } from '../utils/ConfigManager.js';
 
 class AuthLogic {
 
-  // User data / null
+  // RETURN: User data / null
   async findUserByEmail(email) {
     return await db.User.findOne({
       attributes: [
@@ -22,7 +22,7 @@ class AuthLogic {
     });
   }
 
-  // User data / null
+  // RETURN: User data / null
   async findUserByPhone(phonenum) {
     return await db.User.findOne({
       attributes: [
@@ -40,7 +40,7 @@ class AuthLogic {
     });
   };
 
-  // User data / null       이거 안보이는데...
+  // RETURN: User data / null       이거 안보이는데...
   async findUserByUID(userUID) {
     return await db.User.findOne({
       where: {
@@ -52,14 +52,14 @@ class AuthLogic {
     });
   };
 
-  // 0 / 1
+  // RETURN: 0 / 1
   async dropout(userUID) {
     return await db.User.destroy({
       where: { userUID }
     });
   };
 
-  // error / User data
+  // RETURN: User data / Error
   async createUser(email, pwHash, displayname, phonenum) {
     return await db.User.create({
       email,
@@ -69,7 +69,7 @@ class AuthLogic {
     });
   };
 
-  // error / User.point
+  // Point 충전, RETURN: User.point / Error
   async createLoadRecord(type, remark, load, UserUserUID) {
     try {
       const result = await db.sequelize.transaction(async transaction => {
@@ -98,7 +98,7 @@ class AuthLogic {
     }
   }
 
-  // error / Point data
+  // RETURN: Point data / Error
   async createPurchaseRecord(type, remark, pay, purchaseUID, userUID) {
     try {
       const userData = await db.User.findOne({ where: { userUID } });
@@ -129,8 +129,9 @@ class AuthLogic {
     }
   };
 
+  // RETURN: true / Error
   async updatePassword(email, password) {
-    return await db.User.update({ password }, {
+    await db.User.update({ password }, {
       where: {
         email,
         deletedAt: {
@@ -138,26 +139,29 @@ class AuthLogic {
         },
       }
     })
+
+    return true;
   }
 
-  // 메일러는 서버 분리가 더 좋아보임. worker 도 괜찮을듯??
+  // RETURN: true / Error
+  // mailer는 서버 분리가 더 좋아보임...
   async sendPasswordMail(target, password) {
     try {
       const transporter = nodemailer.createTransport(mailerConfig);
-      const info = await transporter.sendMail({
+      await transporter.sendMail({
         from: mailerConfig.auth.user,
         to: target,
         subject: 'MSA Express 비밀번호 설정입니다.',
         text: `비밀번호는 ${password} 입니다. \n로그인 후 변경해주세요.`
       });
-      console.log('email is sented to ', target, info.messageId);
 
       return true;
     } catch (err) {
-      console.error(`Error | send Password Mail `, err);
+      console.error(`Error! send Password Mail `, err);
       return err;
     }
   }
+
 }
 
 export const AuthLogics = new AuthLogic();

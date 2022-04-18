@@ -3,11 +3,12 @@ import { nanoid } from 'nanoid';
 
 export class RequestFactory {
   constructor() {
+    // request 반환 주소를 위해 Map 사용
     this.idMap = new Map();
   }
 
   async initialize() {
-    this.connection = await amqp.connect('amqp://localhost');
+    this.connection = await amqp.connect('amqp://localhost');   // mq 서비스 사용 프로토콜 지정 port : 5672
     this.channel = await this.connection.createChannel()
     const { queue } = await this.channel.assertQueue('', { exclusive: true });
     this.replyQueue = queue;
@@ -27,7 +28,7 @@ export class RequestFactory {
     return new Promise((resolve, reject) => {
       const id = nanoid();
 
-      // 시간 초과시 초기화, 초기화 하기 위해 query rollback 추가
+      // 시간 초과 시 message 삭제, Error 외부 전파
       const replyTimeout = setTimeout(() => {
         this.idMap.delete(id);
         reject(new Error('Request timeout!'));
@@ -35,7 +36,7 @@ export class RequestFactory {
 
       this.idMap.set(id, handler => {
         this.idMap.delete(id);
-        clearTimeout(replyTimeout); // 성공하면 카운트 제거
+        clearTimeout(replyTimeout); // 성공 시 카운트 제거
         resolve(handler);
       });
 

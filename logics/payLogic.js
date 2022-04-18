@@ -3,7 +3,7 @@ import { Op } from 'sequelize';
 
 class PayLogic {
 
-  // return [] / [arr]
+  // RETURN: [item, ...] / [arr]
   async getItems(page, limit) {
     return await db.Item.findAll({
       attributes: [
@@ -28,14 +28,14 @@ class PayLogic {
     });
   }
 
-  // return error / item Data
+  // RETURN: Item data / Error
   async registerItem(title, price, count, img, discription, manager) {
     const result = await db.Item.create({
       title, price, count, img, discription, manager
     }, { field: ['title'] })
     return result;
   }
-  // return error / item Data
+  // RETURN: Item data / Error
   async findItemById(itemUID) {
     return await db.Item.findOne({
       where: {
@@ -46,6 +46,8 @@ class PayLogic {
       }
     })
   }
+
+  // RETURN: Item data / Error
   async findDeletedItemById(itemUID) {
     return await db.Item.findOne({
       where: {
@@ -57,30 +59,33 @@ class PayLogic {
     })
   }
 
+  // RETURN: true / Error
   // Obj.patchValue = {title, price, img ...} , Obj.itemUID = itemUID
   async patchItem(patchObj) {
-    return await db.Item.update(patchObj.value,
+    await db.Item.update(patchObj.value,
       { where: { itemUID: patchObj.itemUID } }
     );
+    return true;
   }
 
-  // return 0 / 1
+  // RETURN: 0 / 1
   async deleteItem(itemUID) {
     return await db.Item.destroy({ where: { itemUID } })
   }
 
-  // return 0 / 1
+  // RETURN: 0 / 1
   async deleteItemForce(itemUID) {
     return await db.Item.destroy({ where: { itemUID }, force: true })
   }
 
-  // return Purcahse Obj
+  // RETURN: Purcahse data / Error
   async recordPurchase(count, price, discount, type, userUID, remark, ItemItemUID) {
     return await db.Purchase.create({
       count, price, discount, type, userUID, remark, ItemItemUID
     });
   }
 
+  // RETURN: Purchase data / Error
   async getPurchase(idx, userUID) {
     return await db.Purchase.findOne({
       attributes: [
@@ -97,6 +102,7 @@ class PayLogic {
     })
   };
 
+  // RETURN: Purchase datas / Error
   async getPurchases(userUID, page, limit) {
     return await db.Purchase.findAll({
       attributes: [
@@ -118,6 +124,7 @@ class PayLogic {
     })
   };
 
+  // RETURN: 0 / 1
   async deletePurchase(purchaseUID) {
     return await db.Purchase.destroy({
       where: {
@@ -125,7 +132,6 @@ class PayLogic {
       }
     })
   };
-
 
 }
 

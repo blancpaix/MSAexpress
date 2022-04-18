@@ -22,11 +22,11 @@ export default function (passport) {
       const hashResult = await bcrypt.compare(password, result.password);
       if (!hashResult) return done(null, false, '비밀번호가 일치하지 않습니다.')
       delete result.password;
+
       return done(null, result);
     } catch (err) {
-      console.error(err);
+      console.error('Error! passport Local Stragety', err);
       done(err);
     }
   }))
-
-}
+};

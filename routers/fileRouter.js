@@ -1,9 +1,11 @@
 import express from 'express';
+import asyncHandler from 'express-async-handler';
 import path from 'path';
 import fs from 'fs';
 import multer from 'multer';
-import { isActivate, isOwnFile, isAdmin } from './middlewares/sessionChecker.js';
+import { isActivate, isOwnFile, isManager } from './middlewares/sessionChecker.js';
 import { FileLogics } from '../logics/fileLogic.js';
+
 
 const router = express.Router();
 const __dirname = path.resolve();
@@ -15,10 +17,10 @@ fs.readdir(path.join(__dirname, '/images'), (err) => {
     fs.mkdirSync('images')
   }
 });
-fs.readdir(path.join(__dirname, '/static'), (err) => {
+fs.readdir(path.join(__dirname, '/statics'), (err) => {
   if (err) {
-    console.error('static 폴더가 존재하지 않아 생성합니다.');
-    fs.mkdirSync('static')
+    console.error('statics 폴더가 존재하지 않아 생성합니다.');
+    fs.mkdirSync('statics')
   }
 });
 
@@ -50,43 +52,55 @@ const multerOpts = {
 const imgUpload = multer(multerOpts).single('img');
 const imgsUpload = multer(multerOpts).array('img');
 
-// 반환된 이미지 파일 명은 fileServierDomain:port/img/filename 으로 접근
-// db 저장된 이미지파일은 split("|")로 나눈 후 앞에 등록한 사람의 email 주소를 붙이면 불러올 수 있음
-// item upload 하는 사람은 고유하기때문에 다른 사람이 어떻게 할 수가 없지 ㅎㅎㅎ
+// 반환된 이미지 파일 명은 Domain:port/img/:filename으로 접근
 
-router.get('/img/:itemUID', isActivate, async (req, res) => {
-  return await FileLogics.getImages(req.params.itemUID);
-});
+router.get('/img/:itemUID', isActivate, asyncHandler(async (req, res) => {
+  const result = await FileLogics.getImages(req.params.itemUID);
 
-router.delete('/img/:filename', isOwnFile, async (req, res) => {
-  return await FileLogics.deleteImage(req.params.filename);
-})
+  res.status(200).send(result);
+}));
 
-router.post('/img', isActivate, imgUpload, async (req, res) => {
+router.delete('/img/:filename', isOwnFile, asyncHandler(async (req, res) => {
+  const result = await FileLogics.deleteImage(req.params.filename);
+
+  res.status(200).send(result);
+}));
+
+router.post('/img', isActivate, imgUpload, asyncHandler(async (req, res) => {
   const img = await FileLogics.uploadImage(req.file.filename);
-  res.status(200).json({ img });
-});
 
-router.post('/imgs', isActivate, imgsUpload, async (req, res) => {
+  res.status(200).json({ img });
+}));
+
+router.post('/imgs', isActivate, imgsUpload, asyncHandler(async (req, res) => {
   // imgUID, name, null(itemUID)
   const imgs = await FileLogics.uploadImages(req.files);
-  res.status(200).send({ imgs })
-});
 
+  res.status(200).send({ imgs })
+}));
+
+
+router.delete('/admin/garbage', isManager, asyncHandler(async (req, res) => {
+  const result = await FileLogics.removeDeletedImages();
+
+  res.status(200).send(result);
+}));
 
 // delete single image
-router.delete('/admin/:filename', isAdmin, async (req, res, next) => {
-  await FileLogics.deleteImage(req.params.filename);
-  res.status(200).send(true);
-});
+router.delete('/admin/:filename', isManager, asyncHandler(async (req, res) => {
+  const result = await FileLogics.deleteImage(req.params.filename);
+
+  res.status(200).send(result);
+}));
 
 // delete multiple images
-router.delete('/admin', isAdmin, async (req, res, next) => {
+router.delete('/admin', isManager, asyncHandler(async (req, res) => {
   // filenames : [filename, filename, ...]
   const { filenames } = req.body;
-  await FileLogics.deleteImages(filenames);
-  res.status(200).send(true);
-});
+  const result = await FileLogics.deleteImages(filenames);
+
+  res.status(200).send(result);
+}));
 
 
 export default router;

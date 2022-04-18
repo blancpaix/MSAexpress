@@ -4,6 +4,7 @@ import httpProxy from 'http-proxy';
 import consul from 'consul';
 import { sslOptions } from './utils/ConfigManager.js';
 
+// 서비스 별 서버
 const routing = [
   {
     path: '/auth',
@@ -23,20 +24,18 @@ const routing = [
 ];
 
 const cache = new Map();
-
 const consulClient = consul();
 const proxy = httpProxy.createProxyServer();
-
 proxy.on('error', (err, req, res) => {
   res.writeHead(500).end('Something was wrong...');
 });
 
-// 저장된 캐시 10초마다 제거
-async function removeCacheTimer(path) {
+// 실시간으로 캐시된 서버 목록 10초마다 삭제
+const removeCacheTimer = async (path) => (
   setTimeout(() => {
     cache.delete(path);
-  }, 10000);
-};
+  }, 10000)
+);
 
 const fetchServices = async (route) => {
   const list = cache.get(route.path);
@@ -60,15 +59,8 @@ const consulList = (route) => {
   })
 };
 
-const headers = {
-  "Access-Control-Allow-Origin": "*", // input your domain [http://DOMAIN, https://DOMAIN]
-  "Access-Control-Allow-Methods": "PATCH, POST, GET, DELETE",
-  "Access-Control-Max-Age": 1296000, // 15 days
-}
-
 const loadbalancing = async (req, res) => {
-  // favicon 은 클라이언트에서 요청 주소를 변경해야함  DOMAIN.com/file/static/favicon.ico
-  if (req.url === '/favicon.ico') return;
+  // favicon 은 클라이언트에서 요청주소 변경해야 함  DOMAIN.com/file/static/favicon.ico
 
   const route = routing.find((route) => {
     return req.url.startsWith(route.path);
@@ -85,11 +77,19 @@ const loadbalancing = async (req, res) => {
 };
 
 
+// CORS 제한
+const headers = {
+  "Access-Control-Allow-Origin": "*", // input your domain [http://DOMAIN, https://DOMAIN]
+  "Access-Control-Allow-Methods": "PATCH, POST, GET, DELETE",
+  "Access-Control-Max-Age": 1296000, // 15 days
+}
+
 const server = createServer(async (req, res) => {
   res.writeHead(200, headers);
   loadbalancing(req, res);
 });
 const sslServer = sslCreateServer(sslOptions, async (req, res) => {
+  res.writeHead(200, headers);
   loadbalancing(req, res);
 });
 

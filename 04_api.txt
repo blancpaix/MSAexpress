@@ -15,45 +15,45 @@ POST /auth/signup
   result : true / Error
 
 POST /auth/findid
-  req.body = {phonenum}
+  req.body = { phonenum }
   result : user's email / Error
 
 POST /auth/findpw
-  req.body = {email, phonenum}
+  req.body = { email, phonenum }
   result : true (send pw to user's email) / Error
 
 POST /auth/updatepw  (session required)
-  req.body = {password}
+  req.body = { password }
   result : true / Error
 
 POST /auth/loadPoint (session required) 
-  req.body = {type, remark, load}
+  req.body = { type, remark, load }
   result : user's current point / Error
 
 
 [Pay service]
 GET /pay/items
-  req.params = { offset, currentPage}
+  req.params = { offset, currentPage }
   result : item lists / empty array
 
 POST /pay/item  (session required) 
-  req.body = {title, price, discription, count, img}
+  req.body = { title, price, discription, count, img }
   result : item's UID / Error
 
 GET /pay/item/:itemId (session required) 
-  req.param = itemId
+  req.param = { itemId }
   result : item / Error
 
 PATCH /pay/item/:itemId (session required) 
-  req.param = itemId
+  req.param = { itemId }
   result : item / Error
 
 DELETE /pay/item/:itemId (session required) 
-  req.param = itemId
+  req.param = { itemId }
   result : true / Error
 
 POST /pay/checkout/:itemUID (session required) 
-  req.param = itemUID
+  req.param = { itemUID }
   req.body = {count, price, discount, type, remark}
   result : user's current point / Error
 
@@ -66,33 +66,40 @@ GET /pay/purchases/:purchaseUID  (session required)
   result : purchase / Error
 
 
-
 [File service]
-GET /file/upload/img/:itemUID  (session required) 
-  result : images data / Error
-
-DELETE /file/upload/img/:filename  (session required) 
-  result : true / Error
-
-POST /file/upload/img  (session required) 
-  result : uploaded image data / Error
-
-POST /file/upload/imgs  (session required) 
-  result : uploaded images data / Error
-
-DELETE /file/upload/admin/:filename  (admin role required) 
-  result : true / Error
-
-DELETE /file/upload/admin  (admin role required) 
-  req.body = { filenames }
-  result : true / Error
-
 GET /file/img
   result : image file / Error
 
 GET /file/static
   result : static file / Error
 
+GET /file/manage/img/:itemUID  (session required) 
+  req.params = { itemUID }
+  result : images data / Error
+
+DELETE /file/manage/img/:filename  (session required) 
+  req.params = { filename }
+  result : true / Error
+
+POST /file/manage/img  (session required) 
+  req.file = { upload file }
+  result : uploaded image data / Error
+
+POST /file/manage/imgs  (session required) 
+  req.files = { upload files }
+  result : uploaded images data / Error
+
+
+DELETE /file/manage/admin/garbage  (admin role required)
+  result : true / Error
+
+DELETE /file/manage/admin/:filename  (admin role required) 
+  req.params = { filename }
+  result : true / Error
+
+DELETE /file/manage/admin  (admin role required) 
+  req.body = { filenames }
+  result : true / Error
 
 
 TODO 

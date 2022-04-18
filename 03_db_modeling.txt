@@ -1,78 +1,131 @@
-DB 테이블 설계
-
-ORM 사용을 자제하고 raw query 를 직접 작성해보고 싶었는데 Model 구현하기가 애매해서 ORM 써야겠다.
-씁쓸하구먼
-
-================================
+========================================
+MYSQL
+========================================
 auth-service : auth_msa
 
-  USER {
-    userUID : int (pk)
-    email : char(12)
-    phoneNumber : char(11)
-    name : char(6),
-    displayName: char(24),
-    password : char(128),
-    point : int,
-    state : int(2) { 0: 활성화, 1: 비활성화, 2: 탈퇴, 3: 매니저 }
+  Users {
+    userUID (string) : PK, NN,
+    email (string) : UQ, NN,
+    phonenum (string) : UQ,
+    displayname (string) : NN,
+    password (string) : NN,
+    point (int),
+    role (int) : (IN 0: 활성화, 1: 비활성화, 2: 탈퇴, 3: 관리자 )
+    deletedAt (string),
   }
 
-  POINT {
-    idx : int,
-    type : string,    
-    pay : int,
-    load : int,
-    itemUID : int (remote server fk),
-    note : string,
-    userUID : int (fk),
-    createdAt : date,
+  Points {
+    idx (int) : PK, NN, AI,
+    type (string) : NN, defaultValue : 'etc', (IN 'debit', 'point', 'phone', 'etc')
+    remark (string),
+    pay (int) : NN, defaultValue : 0,
+    load (int) : NN, defaultValue: 0,
+    purchaseUID (int) : (FK - associated with pay_msa.Purchases)
+    createdAt (string),
+    UserUserUID (string) : NN, FK(Users.userUID)
   }
 
+CREATE TABLE IF NOT EXISTS `Users` (
+  `userUID` CHAR(36) BINARY NOT NULL , 
+  '`email` VARCHAR(255) NOT NULL, 
+  `phonenum` VARCHAR(255), 
+  `displayname` VARCHAR(255) NOT NULL, 
+  `password` VARCHAR(255) NOT NULL, 
+  `point` INTEGER NOT NULL DEFAULT 0, 
+  `role` INTEGER NOT NULL DEFAULT 0, 
+  `deletedAt` DATETIME, UNIQUE `Users_email_unique` (`email`), UNIQUE `Users_phonenum_unique` (`phonenum`), PRIMARY KEY (`userUID`)
+) ENGINE=InnoDB;
 
+SHOW INDEX FROM `Users` FROM `auth_msa`
 
-================================
-pay-serive : pay_msa
+CREATE TABLE IF NOT EXISTS `Points` (
+  `idx` INTEGER NOT NULL auto_increment , 
+  `type` VARCHAR(255) NOT NULL DEFAULT 'etc', 
+  `remark` VARCHAR(255), 
+  `pay` INTEGER NOT NULL DEFAULT 0, 
+  `load` INTEGER NOT NULL DEFAULT 0, 
+  `purchaseUID` INTEGER, 
+  `createdAt` DATETIME NOT NULL, 
+  `UserUserUID` CHAR(36) BINARY, PRIMARY KEY (`idx`), FOREIGN KEY (`UserUserUID`) REFERENCES `Users` (`userUID`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB;
 
-  db2: pay-msa
-    ITEMS : {
-      itemUID, price, discount, count, discription, img, manager
-    },
-    Purchases : {
-      userUID, 
-      count, 
-      price, 
-      discount, 
-      timestamp,
-      type,   // card, point, cash, phone, etc
-      remark, 
-      itemUID(items)
-    },
 
 ========================================
-file-service
-  for static files
+pay-service : pay_msa
+
+  Items : {
+    itemUID (int) : PK, NN, AI,
+    title (string) : NN,
+    price (int) : NN,
+    discription (string),
+    count (int) : NN,
+    img (boolean) : (associated with file_msa.Files),
+    mannager (string) : NN (FK - associated with auth_msa.Users),
+    updatedAt (string) : NN,
+    deletedAt (string),
+  },
+  Purchases : {
+    idx (int) : PK, NN, AI,
+    count (int) : NN,
+    price (int) : NN,
+    discount (int),
+    type (string) : (IN 'debit', 'point', 'phone', 'etc'),
+    userUID (string) : (FK - associated with auth_msa.Users),
+    remark (string),
+    createdAt (string) : NN,
+    deletedAt (string),
+  },
 
 
+CREATE TABLE IF NOT EXISTS `Items` (
+  `itemUID` INTEGER NOT NULL auto_increment , 
+  `title` VARCHAR(255) NOT NULL, `price` INTEGER NOT NULL, 
+  `discription` VARCHAR(255), 
+  `count` INTEGER NOT NULL DEFAULT 0, 
+  `img` TINYINT(1) DEFAULT false, 
+  `manager` VARCHAR(255) NOT NULL, 
+  `updatedAt` DATETIME NOT NULL, 
+  `deletedAt` DATETIME, PRIMARY KEY (`itemUID`)
+) ENGINE=InnoDB;
 
-sequelize
+SHOW INDEX FROM `Items` FROM `pay_msa`
 
-모델 이름 단수로 작성하면 복수로 테이블 만들어줌 강제로 동일화 하려먼 opts에 freezeTableName
-모델에 기본적으로 createdAt, updatedAt 필드가 들어감, dataType : DataTypes.DATE 
-opts : { timestamps: false, createAt : false } 로 제거
-
-DataTypes.STRING             // VARCHAR(255)
-DataTypes.STRING(1234)       // VARCHAR(1234)
-DataTypes.TEXT               // TEXT
-DataTypes.TEXT('tiny')       // TINYTEXT
-DataTypes.BOOLEAN            // TINYINT(1)
-DataTypes.INTEGER            // INTEGER.ZEROFILL / UNSIGNED / UNSIGNED.ZEROFILL
-DataTypes.BIGINT             // BIGINT
-DataTypes.FLOAT              // FLOAT
-DataTypes.DATE       // DATETIME for mysql / sqlite, TIMESTAMP WITH TIME ZONE for postgres
-DataTypes.DATE(6)    // DATETIME(6) for mysql 5.6.4+. Fractional seconds support with up to 6 digits of precision
-DataTypes.DATEONLY   // DATE without time
-{  type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4 // Or DataTypes.UUIDV1 }
+CREATE TABLE IF NOT EXISTS `Purchases` (
+  `idx` INTEGER NOT NULL auto_increment , 
+  `count` INTEGER NOT NULL, 
+  `price` INTEGER NOT NULL, 
+  `discount` INTEGER, 
+  `type` VARCHAR(255) NOT NULL DEFAULT 'etc', 
+  `userUID` VARCHAR(255) NOT NULL, 
+  `remark` VARCHAR(255), 
+  `createdAt` DATETIME NOT NULL, 
+  `ItemItemUID` INTEGER, PRIMARY KEY (`idx`), FOREIGN KEY (`ItemItemUID`) REFERENCES `Items` (`itemUID`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB;
 
 
-paranoid : 삭제시 deletedAt 값 설정, destroy ({where}, {force : true})로 완전 삭제
-const User = sequelize.define(modelName, attr, opts)
+========================================
+file-service : file_msa
+  
+  Files : {
+    imageUID (int) : PK, NN, AI
+    name (string) : UQ, NN,
+    itemUID (string) : NN,
+    deletedAt (string),
+  }
+
+
+CREATE TABLE IF NOT EXISTS `Files` (
+  `imageUID` INTEGER NOT NULL auto_increment ,
+  `name` VARCHAR(255) NOT NULL, 
+  `itemUID` INTEGER NOT NULL DEFAULT 0,
+  `deletedAt` DATETIME, UNIQUE`Files_name_unique` (`name`), PRIMARY KEY (`imageUID`)
+) ENGINE=InnoDB;
+
+SHOW INDEX FROM `Files` FROM `file_msa`
+
+
+========================================
+REDIS
+========================================
+  Key : "sess" + user's passport sessionID
+  Value : { ...sessionData, userUID, email, displayname, role }

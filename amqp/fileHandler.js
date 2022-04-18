@@ -8,17 +8,14 @@ const main = async () => {
   });
 
   amqpReplier.handleRequests(async req => {
-    console.log('## request in File-handler ##', req);
-
     switch (req.event) {
       case 'postItem':
         const { itemUID, img } = req.value;
-        const record = await FileLogics.updateReference(itemUID, img);
-        return record;
+        return await FileLogics.updateReference(itemUID, img);
+
       default:
         return;
     }
-
   })
 };
 

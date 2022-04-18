@@ -53,7 +53,6 @@ router.post('/dropout', isActivate, asyncHandler(async (req, res) => {
   req.logout();
   req.session.destroy(
     () => res.status(200).send(true)
-    // res.redirect('/')
   );
 }));
 
@@ -75,7 +74,6 @@ router.post('/signup', notActivate, asyncHandler(async (req, res) => {
 
   if (!result) return res.status(500).json({ Error: '계정 생성에 실패했습니다. 다시 시도해주세요.' });
   res.status(200).send(true);
-  // res.redirect('/auth');
 }));
 
 
@@ -117,9 +115,9 @@ router.post('/updatepw', isActivate, asyncHandler(async (req, res) => {
 
   const email = req.session.passport.user.email;
   const hashPW = await bcrypt.hash(password, 12);
-  await AuthLogics.updatePassword(email, hashPW);
+  const result = await AuthLogics.updatePassword(email, hashPW);
 
-  res.send(true);
+  res.send(result);
 }));
 
 

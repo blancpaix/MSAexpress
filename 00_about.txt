@@ -4,21 +4,25 @@ in CMD:
   localhost:8500
 
 in project directory:
-  nodemon
+  development env : nodemon
     npm run nmauth
     npm run nmpay
     npm run nmfile
+  production env : forever
+    npm run fvauth
+    npm run fvpay
+    npm run fvfile
 
 run Redis-server.exe in local;
 
 
 [MSA Project]
-api 서비스 별 Micro service 실행
+API 서비스 별 Micro server 실행
 
-Single Endpoint (reverse proxyy)
-  -Custom Loadbalancer (node.js base loadBalancer)
+Single Endpoint (Reverse proxy)
+  -Custom Loadbalancer ('./loadBalancer.js')
 
-  -Custom
+  -API Endpoint
     /auth
     /payment
     /file
@@ -28,7 +32,7 @@ Session
     
     
 Server List
-  proxyLoadBalancer,
+  LoadBalancer,
   auth-service server,
   pay-service -server,
   chat-service -server,
@@ -36,12 +40,14 @@ Server List
 Mesh Service tools
   Consul
 
-
 DB
   RDB
-    auth-msa
-    pay-msa
-    
+    MYSQL
+     schema : [
+        auth_msa,
+        pay_msa,
+        file_msa,
+      ]
   IN_MEMORY DB
-    Redis for session
+    Redis
 

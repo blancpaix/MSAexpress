@@ -19,10 +19,9 @@ const dbSelector = () => {
       return process.env.DB_PAY;
     case 'file-service':
       return process.env.DB_FILE;
-    case 'etc-service':
-      return process.env.DB_ETC;
+
     default:
-      return process.env.DB_ETC;
+      return;
   }
 };
 
@@ -55,7 +54,7 @@ export const sessionConfig = {
   cookie: {
     maxAge: 1000 * 600,
     httpOnly: true,
-    secure: false,     // ssl 적용 후  true 전환
+    secure: false,     // VPC 내부간 교환은 괜찮은듯??
   },
 };
 
