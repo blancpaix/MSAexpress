@@ -19,7 +19,8 @@ MSA with node.js (Express)
 >>file-service server
 
 >DB List
->>MYSQL
+>>RDB
+>>>MYSQL
 >>
 >>>auth_msa
 >>>
@@ -27,4 +28,6 @@ MSA with node.js (Express)
 >>>
 >>>file_msa
 >>>
->>Redis (session storage)
+>>IN MEMORY DB
+>>
+>>>Redis (session storage)
