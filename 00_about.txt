@@ -1,53 +1,75 @@
 [Initialize]
-in CMD:
-  consul agent -dev
-  localhost:8500
+  in CMD:
+    consul agent -dev
+    localhost:8500
 
-in project directory:
-  development env : nodemon
-    npm run nmauth
-    npm run nmpay
-    npm run nmfile
-  production env : forever
-    npm run fvauth
-    npm run fvpay
-    npm run fvfile
+  in project directory:
+    development env : nodemon
+      npm run nmauth
+      npm run nmpay
+      npm run nmfile
+    production env : forever
+      npm run fvauth
+      npm run fvpay
+      npm run fvfile
 
-run Redis-server.exe in local;
+  run Redis-server.exe in local;
+
 
 
 [MSA Project]
 API 서비스 별 Micro server 실행
 
-Single Endpoint (Reverse proxy)
-  -Custom Loadbalancer ('./loadBalancer.js')
+  Single Endpoint (Reverse proxy)
+    -Custom Loadbalancer ('./loadBalancer.js')
 
-  -API Endpoint
-    /auth
-    /payment
-    /file
+    -API Endpoint
+      /auth
+      /payment
+      /file
 
-Session
-  storing in in-memory DB (Redis)
-    
-    
-Server List
-  LoadBalancer,
-  auth-service server,
-  pay-service -server,
-  chat-service -server,
+  Session
+    storing in in-memory DB (Redis)
+        
+  Server List
+    LoadBalancer,
+    auth-service server,
+    pay-service server,
+    chat-service server,
 
-Mesh Service tools
-  Consul
+  Mesh Service tools
+    Consul
 
-DB
-  RDB
-    MYSQL
-     schema : [
-        auth_msa,
-        pay_msa,
-        file_msa,
-      ]
-  IN_MEMORY DB
-    Redis
+  DB
+    RDB
+      MYSQL
+      schema : [
+          auth_msa,
+          pay_msa,
+          file_msa,
+        ]
+    IN_MEMORY DB
+      Redis
+
+
+
+[기타 설정]
+  .ENV variables
+    SESSION_SECRET
+
+    DB_PW
+    DB_USER
+    DB_HOST
+    DB_PORT
+    DB_DIALECT
+    DB_AUTH
+    DB_PAY
+    DB_FILE
+
+    REDIS_HOST
+    REDIS_PORT
+
+    MAILER_ADDRESS
+    MAILER_PASSWORD
+
 

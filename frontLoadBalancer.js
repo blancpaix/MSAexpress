@@ -4,6 +4,7 @@ import httpProxy from 'http-proxy';
 import consul from 'consul';
 import { sslOptions } from './utils/ConfigManager.js';
 
+
 // 서비스 별 서버
 const routing = [
   {
@@ -67,7 +68,7 @@ const loadbalancing = async (req, res) => {
   });
 
   const servers = await fetchServices(route);
-  if (typeof servers === Error || !servers.length) return res.status(502).end('Bad gateway.');
+  if (typeof servers === Error || !servers.length) return res.end('Bad gateway.');
 
   route.index = (route.index + 1) % servers.length;
   const server = servers[route.index];

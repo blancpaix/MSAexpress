@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "loadbalancer_pro": "cross-env NODE_ENV=production nodemon frontLoadBalancer.js",
+    "loadbalancer_pro": "cross-env NODE_ENV=production forever frontLoadBalancer.js",
     "loadbalancer": "cross-env nodemon frontLoadBalancer.js",
     "nmauth": "nodemon --signal SIGINT ./services/authService.js auth-service",
     "nmpay": "nodemon --signal SIGINT ./services/payService.js pay-service",
@@ -37,7 +37,9 @@
     "passport": "^0.5.2",
     "passport-local": "^1.0.0",
     "portfinder": "^1.0.28",
-    "sequelize": "^6.17.0"
+    "sequelize": "^6.17.0",
+    "winston": "^3.7.2",
+    "winston-daily-rotate-file": "^4.6.1"
   },
   "devDependencies": {
     "@types/express": "^4.17.13",

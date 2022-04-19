@@ -8,6 +8,7 @@ import session from 'express-session';
 import passport from 'passport';
 import consul from 'consul';
 
+import winstonLogger from '../utils/winstonLogger.js';
 import ConsulManager from '../utils/ConsulManager.js';
 import { db } from '../models/FileIndex.js'
 import { RedisConn } from '../utils/RedisConnector.js';
@@ -48,7 +49,10 @@ async function main() {
   db.sequelize.sync();
   passportConfig(passport);
 
-  app.use(morgan(process.env.NODE_ENV === 'production' ? ':id :method :url :response-time' : 'dev'));
+  app.use(morgan(
+    process.env.NODE_ENV === "production" ? "production" : "dev", {
+    stream: winstonLogger.stream
+  }));
   app.use(session({
     ...sessionConfig,
     store: new RedisStore({ client: RedisConn }),
@@ -79,4 +83,4 @@ main().catch(err => {
   process.exit(1);
 });
 
-// loadBalancer : path : /file,   service: file-service
+// path : /file,   service: file-service
