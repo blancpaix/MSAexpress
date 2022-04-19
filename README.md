@@ -10,13 +10,16 @@ MSA with node.js (Express)
 ![Express](https://user-images.githubusercontent.com/54240763/163981531-eeaa182b-a77c-41c7-93a5-2fc144240b29.png)
 
 >Server List
->>Load Balancer
+>>Single Endpoint
+>>
+>>>Load Balancer
+>>API Endpoint
+>>>>auth-service server
+>>>>
+>>>>pay-service server
+>>>>
+>>>>file-service server
 
->>auth-service server
-
->>pay-service server
-
->>file-service server
 
 >DB List
 >>RDB
