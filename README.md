@@ -11,22 +11,22 @@ MSA with node.js (Express)
 
 >Server List
 >>Load Balancer
->>
+
 >>auth-service server
->>
+
 >>pay-service server
->>
+
 >>file-service server
 
 >DB List
 >>RDB
 >>>MYSQL
->>
->>>auth_msa
 >>>
->>>pay_msa
->>>
->>>file_msa
+>>>>auth_msa
+>>>>
+>>>>pay_msa
+>>>>
+>>>>file_msa
 >>>
 >>IN MEMORY DB
 >>
