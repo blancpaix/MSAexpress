@@ -53,7 +53,7 @@ export const sessionConfig = {
   saveUninitialized: false,
   secret: process.env.SESSION_SECRET,
   cookie: {
-    maxAge: 1000 * 600,
+    maxAge: 1000 * 900,
     httpOnly: true,
     secure: false,     // VPC 내부간 교환은 괜찮은듯??
   },

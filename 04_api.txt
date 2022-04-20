@@ -1,108 +1,131 @@
 [Auth service]
-POST /auth/signin  (session required)
-  req.body = {email, password}
-  result : true / Error
+  -로그인 (세션 유지 시간 : 15분)        (session required)
+  [POST] /auth/signin
+    req.body = { email, password }
+    result : true / Error
 
-POST /auth/signout (session required)
-  result : redirect to main page
+  -로그아웃 (저장된 세션 제거)            (session required)
+  [POST] /auth/signout
+    result : redirect to main page
 
-POST /auth/dropout (session required)
-  req.body = {phonenum, password}
-  result : redirect to main page / Error
+  -회원 탈퇴 (해당 회원의 기록은 유지됨)   (session required)
+  [POST] /auth/dropout
+    req.body = {phonenum, password}
+    result : redirect to main page / Error
 
-POST /auth/signup
-  req.body = { email, password, displayname, phonenum }
-  result : true / Error
+  -회원가입
+  [POST] /auth/signup
+    req.body = { email, password, displayname, phonenum }
+    result : true / Error
 
-POST /auth/findid
-  req.body = { phonenum }
-  result : user's email / Error
+  -아이디 찾기
+  [POST] /auth/findid
+    req.body = { phonenum }
+    result : user's email / Error
 
-POST /auth/findpw
-  req.body = { email, phonenum }
-  result : true (send pw to user's email) / Error
+  -비밀번호 찾기 (변경된 비밀번호를 Email로 전송)
+  [POST] /auth/findpw
+    req.body = { email, phonenum }
+    result : true (send the new password to user's email) / Error
 
-POST /auth/updatepw  (session required)
-  req.body = { password }
-  result : true / Error
+  -비밀번호 변경                         (session required)
+  [POST] /auth/updatepw
+    req.body = { password }
+    result : true / Error
 
-POST /auth/loadPoint (session required) 
-  req.body = { type, remark, load }
-  result : user's current point / Error
+  -포인트 충전                           (session required) 
+  [POST] /auth/loadPoint
+    req.body = { type, remark, load }
+    result : user's current point / Error
 
 
 [Pay service]
-GET /pay/items
-  req.params = { offset, currentPage }
-  result : item lists / empty array
+  -상품명으로 검색
+  [GET] /pay/search
+    req.body = { term }
+    result : item lists / Empty array []
+  -상품 목록 불러오기
+  [GET] /pay/items
+    req.params = { offset, currentPage }
+    result : item lists / Empty array []
 
-POST /pay/item  (session required) 
-  req.body = { title, price, discription, count, img }
-  result : item's UID / Error
+  -상품 등록                             (session required) 
+  [POST] /pay/item
+    req.body = { title, price, discription, count, img }
+    result : item's UID / Error
 
-GET /pay/item/:itemId (session required) 
-  req.param = { itemId }
-  result : item / Error
+  -특정 상품 정보 불러오기                (session required) 
+  [GET] /pay/item/:itemId
+    req.param = { itemId }
+    result : item / Error
 
-PATCH /pay/item/:itemId (session required) 
-  req.param = { itemId }
-  result : item / Error
+  -특정 상품 정보 업데이트                (session required) 
+  [PATCH] /pay/item/:itemId
+    req.param = { itemId }
+    result : item / Error
 
-DELETE /pay/item/:itemId (session required) 
-  req.param = { itemId }
-  result : true / Error
+  -특정 상품 삭제                        (session required) 
+  [DELETE] /pay/item/:itemId
+    req.param = { itemId }
+    result : true / Error
 
-POST /pay/checkout/:itemUID (session required) 
-  req.param = { itemUID }
-  req.body = {count, price, discount, type, remark}
-  result : user's current point / Error
+  -상품 구매                             (session required) 
+  [POST] /pay/checkout/:itemUID
+    req.param = { itemUID }
+    req.body = {count, price, discount, type, remark}
+    result : user's current point / Error
 
-GET /pay/purchases  (session required) 
-  req.params = { offset, currentPage }
-  result : purchase list / Error
+  -구매 내역 불러오기                     (session required) 
+  [GET] /pay/purchases
+    req.params = { offset, currentPage }
+    result : purchase list / Error
 
-GET /pay/purchases/:purchaseUID  (session required) 
-  req.params = { purchaseUID }
-  result : purchase / Error
+  -특정 구매 내역 불러오기                 (session required) 
+  [GET] /pay/purchases/:purchaseUID
+    req.params = { purchaseUID }
+    result : purchase / Error
 
 
 [File service]
-GET /file/img
-  result : image file / Error
+  -업로드된 이미지파일 직접 불러오기
+  [GET] /file/img/:filename
+    result : image file / Error
 
-GET /file/static
-  result : static file / Error
+  -정적 파일 불러오기
+  [GET] /file/static/:filename
+    result : static file / Error
 
-GET /file/manage/img/:itemUID  (session required) 
-  req.params = { itemUID }
-  result : images data / Error
+  -특정 아이템에 등록된 이미지 불러오기      (session required) 
+  [GET] /file/manage/img/:itemUID
+    req.params = { itemUID }
+    result : images data / Error
 
-DELETE /file/manage/img/:filename  (session required) 
-  req.params = { filename }
-  result : true / Error
+  -특정 아이템에 등록된 이미지 삭제          (사용자 제한 session required)
+  [DELETE] /file/manage/img/:filename
+    req.params = { filename }
+    result : true / Error
 
-POST /file/manage/img  (session required) 
-  req.file = { upload file }
-  result : uploaded image data / Error
+  -하나의 이미지 등록                       (사용자 제한 session required)
+  [POST] /file/manage/img
+    req.file = { upload file }
+    result : uploaded image data / Error
 
-POST /file/manage/imgs  (session required) 
-  req.files = { upload files }
-  result : uploaded images data / Error
-
-
-DELETE /file/manage/admin/garbage  (admin role required)
-  result : true / Error
-
-DELETE /file/manage/admin/:filename  (admin role required) 
-  req.params = { filename }
-  result : true / Error
-
-DELETE /file/manage/admin  (admin role required) 
-  req.body = { filenames }
-  result : true / Error
+  -두개이상의 이미지 등록                    (사용자 제한 session required)
+  [POST] /file/manage/imgs
+    req.files = { upload files }
+    result : uploaded images data / Error
 
 
-TODO 
-POST /pay/item
-PATCH /pay/item
-  File service 와 상호연동 필요
+  -사용하지 않는 이미지 삭제                 (관리자)
+  [DELETE] /file/manage/admin/garbage
+    result : true / Error
+
+  -특정 이미지 삭제                         (관리자)
+  [DELETE] /file/manage/admin/:filename
+    req.params = { filename }
+    result : true / Error
+
+  -두개이상의 특정 이미지 삭제               (관리자)
+  [DELETE] /file/manage/admin
+    req.body = { filenames }
+    result : true / Error

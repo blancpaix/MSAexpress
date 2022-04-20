@@ -35,7 +35,7 @@ API 서비스 별 Micro server 실행
     LoadBalancer,
     auth-service server,
     pay-service server,
-    chat-service server,
+    file-service server,
 
   Mesh Service tools
     Consul

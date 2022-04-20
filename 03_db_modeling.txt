@@ -4,26 +4,27 @@ MYSQL
 auth-service : auth_msa
 
   Users {
-    userUID (string) : PK, NN,
-    email (string) : UQ, NN,
-    phonenum (string) : UQ,
-    displayname (string) : NN,
-    password (string) : NN,
-    point (int),
-    role (int) : (IN 0: 활성화, 1: 비활성화, 2: 탈퇴, 3: 관리자 )
-    deletedAt (string),
+    userUID       (string: UUID)  : PK, NN,
+    email         (string: email) : UQ, NN,
+    phonenum      (string)        : UQ,
+    displayname   (string)        : NN,
+    password      (string)        : NN,
+    point         (int),
+    role          (int)           : (IN 0: 활성화, 1: 비활성화, 2: 탈퇴, 3: 관리자 )
+    deletedAt     (string),
   }
 
   Points {
-    idx (int) : PK, NN, AI,
-    type (string) : NN, defaultValue : 'etc', (IN 'debit', 'point', 'phone', 'etc')
-    remark (string),
-    pay (int) : NN, defaultValue : 0,
-    load (int) : NN, defaultValue: 0,
-    purchaseUID (int) : (FK - associated with pay_msa.Purchases)
-    createdAt (string),
-    UserUserUID (string) : NN, FK(Users.userUID)
+    idx           (int)      : PK, NN, AI,
+    type          (string)   : NN, defaultValue : 'etc', (IN 'debit', 'point', 'phone', 'etc')
+    remark        (string),                             // 비고
+    pay           (int)      : NN, defaultValue : 0,    // 사용된 포인트
+    load          (int)      : NN, defaultValue: 0,     // 충전된 포인트
+    purchaseUID   (int)      : (FK - associated with pay_msa.Purchases)
+    createdAt     (string),  
+    UserUserUID   (string)   : NN, FK(Users.userUID)
   }
+
 
 CREATE TABLE IF NOT EXISTS `Users` (
   `userUID` CHAR(36) BINARY NOT NULL , 
@@ -54,26 +55,26 @@ CREATE TABLE IF NOT EXISTS `Points` (
 pay-service : pay_msa
 
   Items : {
-    itemUID (int) : PK, NN, AI,
-    title (string) : NN,
-    price (int) : NN,
+    itemUID     (int)     : PK, NN, AI,
+    title       (string)  : NN,
+    price       (int)     : NN,
     discription (string),
-    count (int) : NN,
-    img (boolean) : (associated with file_msa.Files),
-    mannager (string) : NN (FK - associated with auth_msa.Users),
-    updatedAt (string) : NN,
-    deletedAt (string),
+    count       (int)     : NN,
+    img         (boolean) : (associated with file_msa.Files),
+    mannager    (string)  : NN (FK - associated with auth_msa.Users),
+    updatedAt   (string)  : NN,
+    deletedAt   (string),
   },
   Purchases : {
-    idx (int) : PK, NN, AI,
-    count (int) : NN,
-    price (int) : NN,
-    discount (int),
-    type (string) : (IN 'debit', 'point', 'phone', 'etc'),
-    userUID (string) : (FK - associated with auth_msa.Users),
-    remark (string),
-    createdAt (string) : NN,
-    deletedAt (string),
+    idx         (int)     : PK, NN, AI,
+    count       (int)     : NN,
+    price       (int)     : NN,
+    discount    (int),  
+    type        (string)  : (IN 'debit', 'point', 'phone', 'etc'),
+    userUID     (string)  : (FK - associated with auth_msa.Users),
+    remark      (string), 
+    createdAt   (string)  : NN,
+    deletedAt   (string),
   },
 
 
@@ -107,10 +108,10 @@ CREATE TABLE IF NOT EXISTS `Purchases` (
 file-service : file_msa
   
   Files : {
-    imageUID (int) : PK, NN, AI
-    name (string) : UQ, NN,
-    itemUID (string) : NN,
-    deletedAt (string),
+    imageUID    (int)     : PK, NN, AI
+    name        (string)  : UQ, NN,
+    itemUID     (string)  : NN,
+    deletedAt   (string),
   }
 
 
@@ -122,6 +123,7 @@ CREATE TABLE IF NOT EXISTS `Files` (
 ) ENGINE=InnoDB;
 
 SHOW INDEX FROM `Files` FROM `file_msa`
+
 
 
 ========================================

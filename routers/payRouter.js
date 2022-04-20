@@ -1,12 +1,20 @@
 import express from 'express';
 import asyncHandler from 'express-async-handler';
-import { isActivate, notActivate, isOwn } from './middlewares/sessionChecker.js'
+import { isActivate, isOwn } from './middlewares/sessionChecker.js'
 
 import { PayLogics } from '../logics/payLogic.js';
 import { amqpRequest } from '../utils/mq/RequestFactory.js';
 
 const router = express.Router();
 
+router.get('/search', asyncHandler(async (req, res) => {
+  const { term } = req.body;
+  const page = req.query.page ? parseInt(req.query.page) : 1;
+  const limit = req.query.limit ? parseInt(req.query.limit) : 30;
+  const result = await PayLogics.searchItems(term, page, limit);
+
+  res.status(200).send(result);
+}));
 router.get('/items', asyncHandler(async (req, res) => {
   const page = req.query.page ? parseInt(req.query.page) : 1;
   const limit = req.query.limit ? parseInt(req.query.limit) : 30;

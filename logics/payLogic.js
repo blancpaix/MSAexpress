@@ -3,6 +3,33 @@ import { Op } from 'sequelize';
 
 class PayLogic {
 
+  async searchItems(term, page, limit) {
+    return await db.Item.findAll({
+      attributes: [
+        'itemUID',
+        'title',
+        'price',
+        'discription',
+        'img',
+        'manager',
+        'updatedAt'
+      ],
+      where: {
+        title: {
+          [Op.like]: `%${term}%`,
+        },
+        deletedAt: {
+          [Op.is]: null
+        }
+      },
+      order: [
+        ['itemUID', 'DESC'],
+      ],
+      offset: limit * (page - 1),
+      limit,
+    })
+  }
+
   // RETURN: [item, ...] / [arr]
   async getItems(page, limit) {
     return await db.Item.findAll({
