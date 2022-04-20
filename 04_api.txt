@@ -110,7 +110,7 @@
     req.file = { upload file }
     result : uploaded image data / Error
 
-  -두개이상의 이미지 등록                    (사용자 제한 session required)
+  -두개 이상의 이미지 등록                    (사용자 제한 session required)
   [POST] /file/manage/imgs
     req.files = { upload files }
     result : uploaded images data / Error
@@ -125,7 +125,7 @@
     req.params = { filename }
     result : true / Error
 
-  -두개이상의 특정 이미지 삭제               (관리자)
+  -두개 이상의 특정 이미지 삭제               (관리자)
   [DELETE] /file/manage/admin
     req.body = { filenames }
     result : true / Error
