@@ -7,6 +7,7 @@ const { combine, timestamp, printf, colorize } = winston.format;
 
 const logsDir = path.join(__dirname, 'logs/' + process.argv[2].split("-")[0]);
 
+// 로그는 WAF에서 로그로 빼는게 좋음. 여기서 기록할 로그는 실패나 에러 발생시 기록용
 const logFormat = printf(info => (
   `${info.timestamp} ${info.level} : ${info.message}`
 ));

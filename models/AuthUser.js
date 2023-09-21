@@ -76,6 +76,12 @@ export default function (sequelize, DataTypes) {
       }
     },
   }, {
+    indexes: [
+      {
+        unique : true,
+        fields : ['email']
+      }
+    ],
     paranoid: true,
     timestamps: true,
     updatedAt: false,
